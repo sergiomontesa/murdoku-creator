@@ -1,0 +1,25 @@
+# Normaliza los finales de línea a LF en todos los clones (Windows, macOS, Linux)
+* text=auto
+
+# Texto: forzar LF
+*.vue text eol=lf
+*.ts text eol=lf
+*.mts text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.svg text eol=lf
+*.txt text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Binarios: no tocar
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.pdf binary
