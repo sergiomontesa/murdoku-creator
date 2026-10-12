@@ -1,0 +1,285 @@
+@import "tailwindcss";
+
+/* ============================================================
+   TOKENS DE DISEÑO - TEMA MURDOKU
+   ============================================================ */
+@theme {
+  /* Paleta principal */
+  --color-dark-900: #0D0B12;
+  --color-dark-800: #13101C;
+  --color-dark-700: #1A1528;
+  --color-dark-600: #231D35;
+  --color-dark-500: #2E2645;
+
+  /* Acento dorado */
+  --color-gold-400: #FFE066;
+  --color-gold-500: #FFD54A;
+  --color-gold-600: #F5C014;
+
+  /* Acento violeta */
+  --color-violet-400: #A78BFA;
+  --color-violet-500: #8B5CF6;
+  --color-violet-600: #7C3AED;
+
+  /* Acento teal */
+  --color-teal-400: #2DD4BF;
+  --color-teal-500: #14B8A6;
+
+  /* Acento rosa */
+  --color-rose-400: #FB7185;
+  --color-rose-500: #F43F5E;
+
+  /* Tipografía */
+  --font-display: 'Montserrat', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-script: 'Caveat', cursive;
+
+  /* Animaciones personalizadas */
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-pulse-gold: pulse-gold 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.5s linear infinite;
+  --animate-fade-up: fade-up 0.5s ease-out;
+  --animate-scale-in: scale-in 0.3s ease-out;
+}
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 213, 74, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 213, 74, 0.6); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0D0B12;
+  color: #E8E6F0;
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   CLASES UTILITARIAS PERSONALIZADAS
+   ============================================================ */
+
+/* Glassmorphism */
+.glass {
+  background: rgba(26, 21, 40, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.glass-gold {
+  background: rgba(26, 21, 40, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 213, 74, 0.2);
+}
+
+/* Gradientes de texto */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFD54A 0%, #FF8C42 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #A78BFA 0%, #60A5FA 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-teal {
+  background: linear-gradient(135deg, #2DD4BF 0%, #818CF8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Fondo con textura de estrellas */
+.starfield {
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(255, 213, 74, 0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 80%, rgba(45, 212, 191, 0.06) 0%, transparent 40%),
+    #0D0B12;
+  z-index: -1;
+}
+
+/* Shimmer effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 213, 74, 0.08) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
+/* Animaciones */
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-pulse-gold { animation: pulse-gold 2s ease-in-out infinite; }
+.animate-shimmer { animation: shimmer 2.5s linear infinite; }
+.animate-fade-up { animation: fade-up 0.5s ease-out; }
+.animate-scale-in { animation: scale-in 0.3s ease-out; }
+.animate-spin-slow { animation: spin-slow 8s linear infinite; }
+.animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
+
+/* Borde dorado animado */
+.border-glow-gold {
+  border: 1px solid rgba(255, 213, 74, 0.4);
+  box-shadow: 0 0 20px rgba(255, 213, 74, 0.15), inset 0 0 20px rgba(255, 213, 74, 0.05);
+}
+
+.border-glow-purple {
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15), inset 0 0 20px rgba(139, 92, 246, 0.05);
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #13101C;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.4);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 213, 74, 0.5);
+}
+
+/* Transiciones de ruta */
+.route-enter-active,
+.route-leave-active {
+  transition: all 0.4s ease;
+}
+
+.route-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.route-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+/* ============================================================
+   EFECTOS GRÁFICOS PARA MAPA, EMOJIS Y FICHAS
+   ============================================================ */
+
+/* Fuente enriquecida para iconos emoji */
+.font-emoji {
+  font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+}
+
+/* Ficha / Token táctil de personaje estilo Murdoku */
+.token-disc {
+  background: radial-gradient(circle at 35% 35%, #3d2b1f, #1b120c);
+  border: 2px solid #F59E0B;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), 0 0 10px rgba(245, 158, 11, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.token-disc:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.8), 0 0 15px rgba(245, 158, 11, 0.7);
+}
+
+/* Efecto para objetos ocupables (camas, hamacas, sillas) */
+.seat-spot {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.08) 100%);
+  border: 1px dashed rgba(52, 211, 153, 0.7);
+  box-shadow: inset 0 0 8px rgba(16, 185, 129, 0.2);
+}
+
+/* Efecto para objetos fijos / no ocupables (roca, fogata, árbol...) */
+.obstacle-spot {
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.6));
+}
+
+/* Resplandor cálido de fogata */
+.fire-glow {
+  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.75)) drop-shadow(0 0 16px rgba(234, 88, 12, 0.4));
+  animation: flicker 1.8s ease-in-out infinite alternate;
+}
+@keyframes flicker {
+  0% { filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.7)) drop-shadow(0 0 12px rgba(234, 88, 12, 0.3)); }
+  100% { filter: drop-shadow(0 0 11px rgba(251, 146, 60, 0.9)) drop-shadow(0 0 20px rgba(249, 115, 22, 0.6)); }
+}
+
+/* Resaltado de fila/columna inspeccionada (cruz tactica) */
+.crosshair-cell {
+  box-shadow: inset 0 0 0 999px rgba(255, 213, 74, 0.07);
+}
+
+/* Lluvia de confeti al resolver el puzzle */
+.confetti-piece {
+  position: absolute;
+  top: -12px;
+  border-radius: 2px;
+  animation: confetti-fall linear infinite;
+}
+@keyframes confetti-fall {
+  to { transform: translateY(105vh) rotate(720deg); }
+}
+
+/* Resplandor dorado del tesoro */
+.treasure-glow {
+  filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.9)) drop-shadow(0 0 24px rgba(234, 179, 8, 0.6));
+  animation: pulse-gold 1.5s ease-in-out infinite;
+}
