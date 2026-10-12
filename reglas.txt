@@ -1,0 +1,113 @@
+- Se aplican las reglas básicas de Murdoku.
+- Esta vez no hay asesino, encuentra las coordenadas del Tesoro para resolver este caso. El Tesoro está en la última casilla de todas.
+- Las Balandras, las Fragatas y el Galeón cuentan como barcos, y cada uno cuenta como su propia zona.
+- La cama, silla y hamaca se pueden ocupar
+- La fogata, árbol, flores, tiburón, saco, cerdo, lápida, caja, cuerda, barril, estantería, arbusto, mesa y roca no se pueden ocupar
+- Los personajes son:
+
+Augustus
+Estaba junto a
+un fogata.
+
+Bart
+Estaba en una hamaca.
+No había ningún saco
+en toda su columna.
+
+Cedric
+Alguien situado exactamente
+ocho filas al norte de
+él estaba junto a la lápida.
+
+Dudley
+Estaba al este de Griselda
+y al oeste de Linus.
+
+Eiko
+Estaba junto a
+una estantería.
+
+Fleur
+Estaba junto a
+unas flores.
+
+Griselda
+Estaba en la
+fila superior
+de su zona.
+
+Hyacinth
+Estaba en el Acantilado.
+Nadie en una columna
+adyacente llevaba sombrero.
+
+Isolde
+Estaba sentada en una silla.
+Estaba en una Cabaña con
+alguien que llevaba
+un parche en el ojo.
+
+Julius
+Estaba junto a
+un barril.
+
+Kathleen
+Estaba
+en una Balandra.
+
+Linus
+Estaba junto a
+un árbol.
+
+Mortimer
+Estaba en un barco,
+junto a una cuerda.
+
+Nehemiah
+Estaba en el Agua,
+junto a un barco.
+
+Orville
+Estaba en
+un barco.
+
+Pedro
+Estaba
+en una cama.
+
+Quincy
+Estaba en el Agua,
+junto a un tiburón.
+
+Rosalind
+Estaba sentada
+en una silla.
+
+Seraphina
+Estaba al menos
+seis filas al norte
+de Linus.
+
+Ursula
+Estaba delante
+de una puerta.
+
+Wilfred
+Estaba junto a
+un cerdo.
+
+Yannis
+Estaba en
+el Bosque.
+No estaba
+junto a un árbol.
+
+Zoe
+Estaba junto a
+un arbusto.
+
+TESORO
+Está en la última casilla.
+Puede estar enterrado bajo
+un objeto que normalmente
+no se puede ocupar.
