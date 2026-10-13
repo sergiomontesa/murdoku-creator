@@ -35,17 +35,17 @@ interface ZoneRect {
 
 const OFFICIAL_ZONE_RECTS: ZoneRect[] = [
   { id: 'zone-cabana-a', name: 'Cabaña A', type: 'room', emoji: '🛖', color: '#854D0E', r0: 0, r1: 2, c0: 3, c1: 5 },
-  { id: 'zone-caverna', name: 'Caverna', type: 'room', emoji: '🕳️', color: '#475569', r0: 0, r1: 4, c0: 16, c1: 23 },
-  { id: 'zone-playa-norte', name: 'Playa Norte', type: 'outdoor', emoji: '🏖️', color: '#D97706', r0: 4, r1: 4, c0: 7, c1: 15 },
+  { id: 'zone-caverna', name: 'Caverna', type: 'room', emoji: '🕳', color: '#475569', r0: 0, r1: 4, c0: 16, c1: 23 },
+  { id: 'zone-playa-norte', name: 'Playa Norte', type: 'outdoor', emoji: '🏖', color: '#D97706', r0: 4, r1: 4, c0: 7, c1: 15 },
   { id: 'zone-fragata-a', name: 'Fragata A', type: 'vehicle', emoji: '🚢', color: '#C2410C', r0: 8, r1: 9, c0: 12, c1: 16 },
-  { id: 'zone-playa', name: 'Playa', type: 'outdoor', emoji: '🏖️', color: '#EAB308', r0: 5, r1: 10, c0: 0, c1: 10 },
+  { id: 'zone-playa', name: 'Playa', type: 'outdoor', emoji: '🏖', color: '#EAB308', r0: 5, r1: 10, c0: 0, c1: 10 },
   { id: 'zone-balandra-a', name: 'Balandra A', type: 'vehicle', emoji: '⛵', color: '#EA580C', r0: 10, r1: 11, c0: 4, c1: 7 },
   { id: 'zone-balandra-b', name: 'Balandra B', type: 'vehicle', emoji: '⛵', color: '#F97316', r0: 12, r1: 13, c0: 2, c1: 5 },
   { id: 'zone-balandra-c', name: 'Balandra C', type: 'vehicle', emoji: '⛵', color: '#FB923C', r0: 12, r1: 13, c0: 7, c1: 10 },
-  { id: 'zone-galeon', name: 'Galeón', type: 'vehicle', emoji: '🏴‍☠️', color: '#B45309', r0: 14, r1: 17, c0: 4, c1: 10 },
+  { id: 'zone-galeon', name: 'Galeón', type: 'vehicle', emoji: '🏴', color: '#B45309', r0: 14, r1: 17, c0: 4, c1: 10 },
   { id: 'zone-muelle', name: 'Muelle', type: 'special', emoji: '⚓', color: '#0D9488', r0: 13, r1: 19, c0: 8, c1: 11 },
   { id: 'zone-fragata-b', name: 'Fragata B', type: 'vehicle', emoji: '🚢', color: '#9A3412', r0: 21, r1: 23, c0: 0, c1: 3 },
-  { id: 'zone-acantilado', name: 'Acantilado', type: 'special', emoji: '⛰️', color: '#64748B', r0: 20, r1: 22, c0: 3, c1: 7 },
+  { id: 'zone-acantilado', name: 'Acantilado', type: 'special', emoji: '⛰', color: '#64748B', r0: 20, r1: 22, c0: 3, c1: 7 },
   { id: 'zone-cabana-b', name: 'Cabaña B', type: 'room', emoji: '🛖', color: '#A16207', r0: 13, r1: 17, c0: 12, c1: 15 },
   { id: 'zone-taberna', name: 'Taberna', type: 'room', emoji: '🍺', color: '#7C3AED', r0: 14, r1: 20, c0: 18, c1: 23 },
   { id: 'zone-cabana-c', name: 'Cabaña C', type: 'room', emoji: '🛖', color: '#713F12', r0: 19, r1: 22, c0: 12, c1: 15 },
@@ -92,7 +92,7 @@ function buildOfficialZones(): Zone[] {
   }
   zones.push({ id: 'zone-agua', name: 'Agua / Mar', type: 'water', emoji: '🌊', color: '#0284C7', cells: water })
   return zones
-} 
+}
 
 /** Genera los objetos colocados en el mapa del caso oficial */
 function getOfficialPlacedObjects(): PlacedObject[] {
@@ -130,28 +130,28 @@ function getOfficialPlacedObjects(): PlacedObject[] {
 /** Los 23 personajes con sus testimonios literales de reglas.txt */
 const OFFICIAL_CHARACTERS: Character[] = [
   { id: 'char-augustus', name: 'Augustus', emoji: '🧔', row: 8, col: 1, zoneId: 'zone-woods', hat: true, eyepatch: false },
-  { id: 'char-bart', name: 'Bart', emoji: '🧑‍🦱', row: 13, col: 14, zoneId: 'zone-cabins', hat: false, eyepatch: false },
-  { id: 'char-cedric', name: 'Cedric', emoji: '🧓', row: 16, col: 15, zoneId: 'zone-cabins', hat: false, eyepatch: false },
-  { id: 'char-dudley', name: 'Dudley', emoji: '👨‍🦰', row: 6, col: 8, zoneId: 'zone-woods', hat: true, eyepatch: false },
-  { id: 'char-eiko', name: 'Eiko', emoji: '👩‍🦳', row: 14, col: 11, zoneId: 'zone-cabins', hat: false, eyepatch: false },
-  { id: 'char-fleur', name: 'Fleur', emoji: '👩‍🦰', row: 2, col: 15, zoneId: 'zone-woods', hat: false, eyepatch: false },
+  { id: 'char-bart', name: 'Bart', emoji: '👦', row: 13, col: 14, zoneId: 'zone-cabins', hat: false, eyepatch: false },
+  { id: 'char-cedric', name: 'Cedric', emoji: '👴', row: 16, col: 15, zoneId: 'zone-cabins', hat: false, eyepatch: false },
+  { id: 'char-dudley', name: 'Dudley', emoji: '👨', row: 6, col: 8, zoneId: 'zone-woods', hat: true, eyepatch: false },
+  { id: 'char-eiko', name: 'Eiko', emoji: '👵', row: 14, col: 11, zoneId: 'zone-cabins', hat: false, eyepatch: false },
+  { id: 'char-fleur', name: 'Fleur', emoji: '👩', row: 2, col: 15, zoneId: 'zone-woods', hat: false, eyepatch: false },
   { id: 'char-griselda', name: 'Griselda', emoji: '🧕', row: 6, col: 3, zoneId: 'zone-beach', hat: false, eyepatch: false },
-  { id: 'char-hyacinth', name: 'Hyacinth', emoji: '👩‍🎤', row: 21, col: 6, zoneId: 'zone-cliff', hat: false, eyepatch: false },
-  { id: 'char-isolde', name: 'Isolde', emoji: '👩‍🎨', row: 15, col: 15, zoneId: 'zone-cabins', hat: false, eyepatch: false },
-  { id: 'char-julius', name: 'Julius', emoji: '👨‍🦳', row: 18, col: 9, zoneId: 'zone-galleon', hat: true, eyepatch: false },
-  { id: 'char-kathleen', name: 'Kathleen', emoji: '👩‍⚕️', row: 11, col: 4, zoneId: 'zone-sloops', hat: false, eyepatch: false },
-  { id: 'char-linus', name: 'Linus', emoji: '🧑‍✈️', row: 6, col: 13, zoneId: 'zone-woods', hat: false, eyepatch: false },
-  { id: 'char-mortimer', name: 'Mortimer', emoji: '🏴‍☠️', row: 9, col: 16, zoneId: 'zone-frigates', hat: true, eyepatch: false },
-  { id: 'char-nehemiah', name: 'Nehemiah', emoji: '🏊‍♂️', row: 12, col: 7, zoneId: 'zone-water', hat: false, eyepatch: false },
-  { id: 'char-orville', name: 'Orville', emoji: '⛵', row: 14, col: 5, zoneId: 'zone-sloops', hat: true, eyepatch: false },
-  { id: 'char-pedro', name: 'Pedro', emoji: '🧑‍🎨', row: 17, col: 13, zoneId: 'zone-cabins', hat: false, eyepatch: true },
-  { id: 'char-quincy', name: 'Quincy', emoji: '🦈', row: 20, col: 1, zoneId: 'zone-water', hat: false, eyepatch: false },
-  { id: 'char-rosalind', name: 'Rosalind', emoji: '👩‍🏫', row: 19, col: 20, zoneId: 'zone-tavern', hat: false, eyepatch: false },
-  { id: 'char-seraphina', name: 'Seraphina', emoji: '🧙‍♀️', row: 0, col: 18, zoneId: 'zone-cavern', hat: false, eyepatch: false },
-  { id: 'char-ursula', name: 'Ursula', emoji: '👩‍🌾', row: 13, col: 11, zoneId: 'zone-cabins', hat: false, eyepatch: false },
-  { id: 'char-wilfred', name: 'Wilfred', emoji: '🐖', row: 4, col: 4, zoneId: 'zone-woods', hat: false, eyepatch: false },
-  { id: 'char-yannis', name: 'Yannis', emoji: '🏹', row: 1, col: 10, zoneId: 'zone-woods', hat: false, eyepatch: false },
-  { id: 'char-zoe', name: 'Zoe', emoji: '🌿', row: 22, col: 17, zoneId: 'zone-tavern', hat: false, eyepatch: false },
+  { id: 'char-hyacinth', name: 'Hyacinth', emoji: '👸', row: 21, col: 6, zoneId: 'zone-cliff', hat: false, eyepatch: false },
+  { id: 'char-isolde', name: 'Isolde', emoji: '👰', row: 15, col: 15, zoneId: 'zone-cabins', hat: false, eyepatch: false },
+  { id: 'char-julius', name: 'Julius', emoji: '👱', row: 18, col: 9, zoneId: 'zone-galleon', hat: true, eyepatch: false },
+  { id: 'char-kathleen', name: 'Kathleen', emoji: '👧', row: 11, col: 4, zoneId: 'zone-sloops', hat: false, eyepatch: false },
+  { id: 'char-linus', name: 'Linus', emoji: '👲', row: 6, col: 13, zoneId: 'zone-woods', hat: false, eyepatch: false },
+  { id: 'char-mortimer', name: 'Mortimer', emoji: '🤠', row: 9, col: 16, zoneId: 'zone-frigates', hat: true, eyepatch: false },
+  { id: 'char-nehemiah', name: 'Nehemiah', emoji: '🏊', row: 12, col: 7, zoneId: 'zone-water', hat: false, eyepatch: false },
+  { id: 'char-orville', name: 'Orville', emoji: '💂', row: 14, col: 5, zoneId: 'zone-sloops', hat: true, eyepatch: false },
+  { id: 'char-pedro', name: 'Pedro', emoji: '👮', row: 17, col: 13, zoneId: 'zone-cabins', hat: false, eyepatch: true },
+  { id: 'char-quincy', name: 'Quincy', emoji: '👳', row: 20, col: 1, zoneId: 'zone-water', hat: false, eyepatch: false },
+  { id: 'char-rosalind', name: 'Rosalind', emoji: '💃', row: 19, col: 20, zoneId: 'zone-tavern', hat: false, eyepatch: false },
+  { id: 'char-seraphina', name: 'Seraphina', emoji: '🧙', row: 0, col: 18, zoneId: 'zone-cavern', hat: false, eyepatch: false },
+  { id: 'char-ursula', name: 'Ursula', emoji: '🙋', row: 13, col: 11, zoneId: 'zone-cabins', hat: false, eyepatch: false },
+  { id: 'char-wilfred', name: 'Wilfred', emoji: '🎅', row: 4, col: 4, zoneId: 'zone-woods', hat: false, eyepatch: false },
+  { id: 'char-yannis', name: 'Yannis', emoji: '🤴', row: 1, col: 10, zoneId: 'zone-woods', hat: false, eyepatch: false },
+  { id: 'char-zoe', name: 'Zoe', emoji: '🧚', row: 22, col: 17, zoneId: 'zone-tavern', hat: false, eyepatch: false },
 ]
 
 /** Pistas exactas y literales extraídas de reglas.txt */

@@ -207,13 +207,32 @@ function generateCharacters(
 
   const maleNames = shuffle([...theme.maleNames])
   const femaleNames = shuffle([...theme.femaleNames])
-  const allNames: string[] = []
-  for (let i = 0; i < numChars; i++) {
-    if (i % 2 === 0) allNames.push(maleNames[Math.floor(i / 2)] ?? `Personaje ${i}`)
-    else allNames.push(femaleNames[Math.floor(i / 2)] ?? `Personaje ${i}`)
-  }
 
-  const charEmojis = ['🧑‍✈️', '👩‍🦰', '🧔', '👩‍🦳', '🧕', '👨‍🦱', '👩‍🦲', '🧓', '👨‍🦳', '👩‍🎤', '🧑‍🎨', '👩‍🔬', '🧑‍⚕️', '👩‍🏴‍☠️', '🧑‍🚀', '👩‍🌾', '🧙']
+  // Emojis específicos por género (1 sola posición) para que los personajes femeninos tengan avatares femeninos
+  const maleEmojis = shuffle([...(theme.maleEmojis && theme.maleEmojis.length > 0
+    ? theme.maleEmojis
+    : ['🧔', '👨', '👦', '👴', '👱', '🤴', '🤠', '👮', '👷', '💂', '👲', '👳', '🎅', '🤵', '🥷', '🕺', '🏊', '🏇', '🤺'])])
+
+  const femaleEmojis = shuffle([...(theme.femaleEmojis && theme.femaleEmojis.length > 0
+    ? theme.femaleEmojis
+    : ['👩', '👧', '👵', '👸', '🧕', '👰', '💃', '🧚', '🧜', '🧝', '🧙', '💁', '🙋', '🧗', '🏄', '🧖', '🧘', '🤸'])])
+
+  const characterMeta: { name: string; emoji: string }[] = []
+  let mCount = 0
+  let fCount = 0
+  for (let i = 0; i < numChars; i++) {
+    if (i % 2 === 0) {
+      const name = maleNames[mCount % maleNames.length] ?? `Sospechoso ${i}`
+      const emoji = maleEmojis[mCount % maleEmojis.length]
+      mCount++
+      characterMeta.push({ name, emoji })
+    } else {
+      const name = femaleNames[fCount % femaleNames.length] ?? `Sospechosa ${i}`
+      const emoji = femaleEmojis[fCount % femaleEmojis.length]
+      fCount++
+      characterMeta.push({ name, emoji })
+    }
+  }
 
   let attempts = 0
   let charIdx = 0
@@ -235,8 +254,8 @@ function generateCharacters(
 
     characters.push({
       id: `char-${charIdx}`,
-      name: allNames[charIdx] ?? `Personaje ${charIdx}`,
-      emoji: charEmojis[charIdx % charEmojis.length],
+      name: characterMeta[charIdx].name,
+      emoji: characterMeta[charIdx].emoji,
       row,
       col,
       zoneId: zone.id,
@@ -383,7 +402,7 @@ function generateTitle(theme: ReturnType<typeof getTheme>, difficulty: ReturnTyp
 }
 
 function generateDescription(theme: ReturnType<typeof getTheme>, numChars: number, gridSize: number): string {
-  return `Caso de deducción en ${theme.name.toLowerCase()} con ${numChars} sospechosos en un mapa de ${gridSize}×${gridSize}. El tesoro se encuentra en la última casilla desocupada.`
+  return `Caso de deducción en ${theme.name.toLowerCase()} con ${numChars} sospechosos en un mapa de ${gridSize}×${gridSize}. El tesoro está enterrado en el cruce de la última fila y la última columna libres.`
 }
 
 // ============================================================
@@ -438,25 +457,19 @@ export function usePuzzleGenerator() {
 
       await progressStep('Ocultando el tesoro en la última casilla...', 98, 300)
 
-      // Identificar todas las celdas ocupadas por personajes o por objetos no ocupables
-      const charCells = new Set(characters.map(c => `${c.row},${c.col}`))
-      const nonOccIds = new Set(theme.objects.filter((o: MapObject) => !o.occupiable).map(o => o.id))
-      const blockedCells = new Set(placedObjects.filter(p => nonOccIds.has(p.objectId)).map(p => `${p.row},${p.col}`))
+      // REGLA Murdoku: el Tesoro esta en la ultima casilla, es decir, en el
+      // cruce de la ultima fila y la ultima columna sin sospechosos.
+      // Puede quedar enterrado bajo un objeto normalmente no ocupable.
+      const rowsWithChar = new Set(characters.map(c => c.row))
+      const colsWithChar = new Set(characters.map(c => c.col))
+      const freeRows = Array.from({ length: gridSize }, (_, r) => r).filter(r => !rowsWithChar.has(r))
+      const freeCols = Array.from({ length: gridSize }, (_, c) => c).filter(c => !colsWithChar.has(c))
 
       let treasureRow = gridSize
       let treasureCol = gridSize
-
-      // La regla Murdoku dice: "El Tesoro está en la última casilla de todas"
-      // Buscamos la última celda desde el final (abajo a la derecha) que no esté ocupada por un sospechoso
-      outer: for (let r = gridSize - 1; r >= 0; r--) {
-        for (let c = gridSize - 1; c >= 0; c--) {
-          const key = `${r},${c}`
-          if (!charCells.has(key) && !blockedCells.has(key)) {
-            treasureRow = r + 1 // 1-indexed
-            treasureCol = c + 1 // 1-indexed
-            break outer
-          }
-        }
+      if (freeRows.length > 0 && freeCols.length > 0) {
+        treasureRow = freeRows[freeRows.length - 1] + 1 // 1-indexed
+        treasureCol = freeCols[freeCols.length - 1] + 1 // 1-indexed
       }
 
       const puzzle: GeneratedPuzzle = {

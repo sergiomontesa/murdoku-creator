@@ -88,6 +88,9 @@ export interface ThemeInfo {
   objects: MapObject[]    // Objetos de la temática
   maleNames: string[]     // Nombres masculinos
   femaleNames: string[]   // Nombres femeninos
+  characterEmojis: string[] // Emojis temáticos únicos para personajes
+  maleEmojis?: string[]   // Emojis específicos masculinos (1 sola posición)
+  femaleEmojis?: string[] // Emojis específicos femeninos (1 sola posición)
 }
 
 /** Información de dificultad */

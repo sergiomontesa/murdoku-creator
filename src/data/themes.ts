@@ -29,7 +29,7 @@ export const THEMES: Record<string, ThemeInfo> = {
     zones: ['Balandras', 'Fragatas', 'Galeón', 'Acantilado', 'Playa de la Calavera', 'Cueva del Contrabandista', 'Taberna del Ancla', 'Agua / Arrecife', 'Faro'],
     objects: [
       // Objetos OCUPABLES (se pueden ocupar)
-      createObj('bed', 'Cama', '🛏️', true),
+      createObj('bed', 'Cama', '🛏', true),
       createObj('chair', 'Silla', '🪑', true),
       createObj('hammock', 'Hamaca', '🪁', true),
 
@@ -43,15 +43,18 @@ export const THEMES: Record<string, ThemeInfo> = {
       createObj('gravestone', 'Lápida', '🪦', false),
       createObj('crate', 'Caja', '📦', false),
       createObj('rope', 'Cuerda', '🪢', false),
-      createObj('barrel', 'Barril', '🛢️', false),
+      createObj('barrel', 'Barril', '🛢', false),
       createObj('bookshelf', 'Estantería', '📚', false),
       createObj('bush', 'Arbusto', '🌿', false),
       createObj('table', 'Mesa', '🪵', false),
       createObj('rock', 'Roca', '🪨', false),
       createObj('cannon', 'Cañón', '💣', false),
     ],
-    maleNames: ['Augustus', 'Bartholomew', 'Cedric', 'Dudley', 'Edgar', 'Flint', 'Gideon', 'Henry', 'Ignatius', 'Jasper', 'Kieran', 'Linus', 'Mortimer', 'Nathaniel', 'Orville', 'Pedro', 'Quentin', 'Roland', 'Sebastian', 'Tobias', 'Ulrich', 'Victor', 'Wilfred', 'Xavier', 'Yannis', 'Zephyr'],
-    femaleNames: ['Abigail', 'Beatrice', 'Cordelia', 'Diana', 'Eiko', 'Fleur', 'Griselda', 'Hyacinth', 'Isolde', 'Josephine', 'Kathleen', 'Luna', 'Miriam', 'Norah', 'Ophelia', 'Penelope', 'Quinn', 'Rosalind', 'Seraphina', 'Temperance', 'Ursula', 'Vivienne', 'Wilhelmina', 'Xanthe', 'Yolanda', 'Zoe'],
+    maleNames: ['Augustus', 'Bartholomew', 'Cedric', 'Dudley', 'Edgar', 'Flint', 'Gideon', 'Henry', 'Ignatius', 'Jasper', 'Kieran', 'Linus', 'Mortimer', 'Nathaniel', 'Orville', 'Pedro', 'Quentin', 'Roland', 'Sebastian', 'Tobias', 'Ulrich', 'Victor', 'Wilfred', 'Xavier', 'Yannis', 'Zephyr', 'Blackbeard', 'Morgan', 'Drake', 'Calico', 'Barnaby', 'Silas'],
+    femaleNames: ['Abigail', 'Beatrice', 'Cordelia', 'Diana', 'Eiko', 'Fleur', 'Griselda', 'Hyacinth', 'Isolde', 'Josephine', 'Kathleen', 'Luna', 'Miriam', 'Norah', 'Ophelia', 'Penelope', 'Quinn', 'Rosalind', 'Seraphina', 'Temperance', 'Ursula', 'Vivienne', 'Wilhelmina', 'Xanthe', 'Yolanda', 'Zoe', 'Anne', 'Mary', 'Bonny', 'Grace', 'Isla', 'Marina'],
+    characterEmojis: ['🧔', '👨', '👦', '👴', '👱', '👲', '👳', '🤠', '💂', '👮', '🎅', '🏊', '🏄', '🚶', '🕺', '🤺', '👩', '👧', '👵', '👸', '🧕', '👰', '💃', '🧚', '🧜', '🧝', '🧙', '💁', '🙋', '🧗', '🧖'],
+    maleEmojis: ['🧔', '👨', '👦', '👴', '👱', '👲', '👳', '🤠', '💂', '👮', '🎅', '🏊', '🏄', '🚶', '🕺', '🤺'],
+    femaleEmojis: ['👩', '👧', '👵', '👸', '🧕', '👰', '💃', '🧚', '🧜', '🧝', '🧙', '💁', '🙋', '🧗', '🏊', '🧖'],
   },
 
   medieval: {
@@ -65,24 +68,27 @@ export const THEMES: Record<string, ThemeInfo> = {
     objects: [
       // Objetos OCUPABLES
       createObj('throne', 'Trono Real', '👑', true),
-      createObj('bed', 'Cama con Dosel', '🛏️', true),
+      createObj('bed', 'Cama con Dosel', '🛏', true),
       createObj('chair', 'Banco de Roble', '🪑', true),
 
       // Objetos FIJOS
-      createObj('sword', 'Espada de Acero', '⚔️', false),
-      createObj('shield', 'Escudo de Armas', '🛡️', false),
-      createObj('torch', 'Antorcha', '🕯️', false),
-      createObj('barrel', 'Barril de Cerveza', '🛢️', false),
+      createObj('sword', 'Espada de Acero', '⚔', false),
+      createObj('shield', 'Escudo de Armas', '🛡', false),
+      createObj('torch', 'Antorcha', '🕯', false),
+      createObj('barrel', 'Barril de Cerveza', '🛢', false),
       createObj('chalice', 'Cáliz Sagrado', '🏆', false),
       createObj('scroll', 'Pergamino Real', '📜', false),
-      createObj('chains', 'Cadenas de Hierro', '⛓️', false),
+      createObj('chains', 'Cadenas de Hierro', '⛓', false),
       createObj('cauldron', 'Caldero Hirviente', '🍲', false),
       createObj('hay', 'Fardo de Paja', '🌾', false),
       createObj('tree', 'Roble Centenario', '🌲', false),
       createObj('well', 'Pozo de Piedra', '⛲', false),
     ],
-    maleNames: ['Aldric', 'Bertrand', 'Conrad', 'Darian', 'Edmund', 'Florian', 'Gauthier', 'Heinrich', 'Ingram', 'Jourdain', 'Konrad', 'Leopold', 'Magnus', 'Nicolas', 'Oswald', 'Pascal', 'Quentin', 'Raynald', 'Sigfried', 'Thibault', 'Ulric', 'Valentin', 'Wilhelm', 'Xander'],
-    femaleNames: ['Adelheid', 'Blanche', 'Cecily', 'Dagmar', 'Eleanor', 'Frieda', 'Gertrude', 'Hildegard', 'Ingrid', 'Johanna', 'Katarina', 'Lieselotte', 'Mathilde', 'Nathalie', 'Ottilie', 'Petra', 'Rosalind', 'Sigrid', 'Theodora', 'Ursula', 'Veronika', 'Wilhelmine'],
+    maleNames: ['Aldric', 'Bertrand', 'Conrad', 'Darian', 'Edmund', 'Florian', 'Gauthier', 'Heinrich', 'Ingram', 'Jourdain', 'Konrad', 'Leopold', 'Magnus', 'Nicolas', 'Oswald', 'Pascal', 'Quentin', 'Raynald', 'Sigfried', 'Thibault', 'Ulric', 'Valentin', 'Wilhelm', 'Xander', 'Arthur', 'Gawain', 'Lancelot', 'Percival', 'Tristan', 'Galahad'],
+    femaleNames: ['Adelheid', 'Blanche', 'Cecily', 'Dagmar', 'Eleanor', 'Frieda', 'Gertrude', 'Hildegard', 'Ingrid', 'Johanna', 'Katarina', 'Lieselotte', 'Mathilde', 'Nathalie', 'Ottilie', 'Petra', 'Rosalind', 'Sigrid', 'Theodora', 'Ursula', 'Veronika', 'Wilhelmine', 'Guinevere', 'Morgana', 'Isolde', 'Rowena', 'Ygraine'],
+    characterEmojis: ['🤴', '🧔', '👨', '👦', '👴', '👱', '💂', '🏇', '🤺', '🤼', '🧙', '🧝', '🧛', '🎅', '🤵', '🚶', '👸', '👩', '👧', '👵', '👰', '🧕', '🧚', '🧜', '💃', '💁', '🙋', '🧘', '🧖'],
+    maleEmojis: ['🤴', '🧔', '👨', '👦', '👴', '👱', '💂', '🏇', '🤺', '🤼', '🧙', '🧝', '🧛', '🎅', '🤵', '🚶'],
+    femaleEmojis: ['👸', '👩', '👧', '👵', '👰', '🧕', '🧚', '🧜', '🧝', '🧙', '🧛', '💃', '💁', '🙋', '🧘', '🧖'],
   },
 
   scifi: {
@@ -95,24 +101,27 @@ export const THEMES: Record<string, ThemeInfo> = {
     zones: ['Puente de Mando', 'Cuarto de Máquinas', 'Bahía de Carga', 'Laboratorio', 'Cámara de Criogenia', 'Hangar', 'Meseta de Datos', 'Módulo Médico'],
     objects: [
       // Objetos OCUPABLES
-      createObj('cryo_pod', 'Cápsula de Criosueño', '❄️', true),
+      createObj('cryo_pod', 'Cápsula de Criosueño', '❄', true),
       createObj('seat', 'Asiento de Piloto', '💺', true),
-      createObj('bunk', 'Litera Magnética', '🛏️', true),
+      createObj('bunk', 'Litera Magnética', '🛏', true),
 
       // Objetos FIJOS
       createObj('laser', 'Rifle Láser', '🔫', false),
       createObj('robot', 'Droide de Servicio', '🤖', false),
       createObj('computer', 'Terminal Cuántica', '💻', false),
       createObj('pod', 'Nave de Escape', '🛸', false),
-      createObj('chemical', 'Reactor Químico', '⚗️', false),
-      createObj('reactor', 'Núcleo de Fusión', '☢️', false),
+      createObj('chemical', 'Reactor Químico', '⚗', false),
+      createObj('reactor', 'Núcleo de Fusión', '☢', false),
       createObj('cable', 'Conducto Eléctrico', '🔌', false),
       createObj('helmet', 'Casco Espacial', '🪖', false),
       createObj('vent', 'Conducto de Ventilación', '🌀', false),
       createObj('alien', 'Espécimen Alienígena', '👾', false),
     ],
-    maleNames: ['Axon', 'Brix', 'Corin', 'Daxon', 'Erix', 'Flux', 'Gravix', 'Helix', 'Ion', 'Juno', 'Kronos', 'Lux', 'Maxar', 'Neutron', 'Orion', 'Proxis', 'Quasar', 'Ryken', 'Sigma', 'Taurus', 'Ultrax', 'Vega', 'Warp'],
-    femaleNames: ['Astra', 'Bora', 'Celeste', 'Deva', 'Eclipse', 'Fiona', 'Gamma', 'Halo', 'Iris', 'Juno', 'Kira', 'Luna', 'Maya', 'Nova', 'Orla', 'Prism', 'Quanta', 'Raya', 'Stella', 'Terra', 'Ula', 'Vega', 'Wren', 'Xara', 'Yara', 'Zara'],
+    maleNames: ['Axon', 'Brix', 'Corin', 'Daxon', 'Erix', 'Flux', 'Gravix', 'Helix', 'Ion', 'Juno', 'Kronos', 'Lux', 'Maxar', 'Neutron', 'Orion', 'Proxis', 'Quasar', 'Ryken', 'Sigma', 'Taurus', 'Ultrax', 'Vega', 'Warp', 'Zion', 'Cyborg', 'Kaelen', 'Tiberius', 'Vader', 'Spock'],
+    femaleNames: ['Astra', 'Bora', 'Celeste', 'Deva', 'Eclipse', 'Fiona', 'Gamma', 'Halo', 'Iris', 'Juno', 'Kira', 'Luna', 'Maya', 'Nova', 'Orla', 'Prism', 'Quanta', 'Raya', 'Stella', 'Terra', 'Ula', 'Vega', 'Wren', 'Xara', 'Yara', 'Zara', 'Nyx', 'Ripley', 'Trinity', 'Uhura'],
+    characterEmojis: ['👨', '👦', '👴', '🧔', '👱', '👮', '👷', '💂', '🦸', '🦹', '👽', '🚶', '🏃', '🧗', '🧍', '🧎', '👩', '👧', '👵', '👸', '🧕', '👰', '🧚', '💁', '🙋', '🧘', '🤸', '🧖', '💃'],
+    maleEmojis: ['👨', '👦', '👴', '🧔', '👱', '👮', '👷', '💂', '🦸', '🦹', '👽', '🚶', '🏃', '🧗', '🧍', '🧎'],
+    femaleEmojis: ['👩', '👧', '👵', '👸', '🧕', '👰', '🦸', '🦹', '🧚', '💁', '🙋', '🧗', '🧘', '🤸', '🧖', '💃'],
   },
 
   western: {
@@ -126,13 +135,13 @@ export const THEMES: Record<string, ThemeInfo> = {
     objects: [
       // Objetos OCUPABLES
       createObj('barstool', 'Taburete de Saloon', '🪑', true),
-      createObj('bed', 'Cama de Rancho', '🛏️', true),
+      createObj('bed', 'Cama de Rancho', '🛏', true),
 
       // Objetos FIJOS
       createObj('revolver', 'Revólver Colt', '🔫', false),
       createObj('bottle', 'Botella de Licor', '🍾', false),
       createObj('horseshoe', 'Herradura', '🧲', false),
-      createObj('barrel', 'Barril de Pólvora', '🛢️', false),
+      createObj('barrel', 'Barril de Pólvora', '🛢', false),
       createObj('rope', 'Lazo de Vaquero', '🪢', false),
       createObj('cactus', 'Cactus del Desierto', '🌵', false),
       createObj('gold', 'Bolsa de Pepitas de Oro', '🪙', false),
@@ -141,8 +150,11 @@ export const THEMES: Record<string, ThemeInfo> = {
       createObj('skull', 'Cráneo en la Arena', '💀', false),
       createObj('wanted', 'Cartel de Se Busca', '📜', false),
     ],
-    maleNames: ['Buck', 'Cal', 'Dallas', 'Elias', 'Frank', 'Garrett', 'Hank', 'Ike', 'Jake', 'Kit', 'Levi', 'Mack', 'Ned', 'Otis', 'Pete', 'Quinn', 'Reno', 'Sam', 'Tex', 'Ulysses', 'Vince', 'Wade', 'Wyatt', 'Zeke'],
-    femaleNames: ['Annie', 'Belle', 'Callie', 'Daisy', 'Emma', 'Faith', 'Grace', 'Hattie', 'Ida', 'Jessie', 'Kate', 'Lila', 'Mae', 'Nora', 'Opal', 'Pearl', 'Rose', 'Sadie', 'Tess', 'Una', 'Vera', 'Winnie'],
+    maleNames: ['Buck', 'Cal', 'Dallas', 'Elias', 'Frank', 'Garrett', 'Hank', 'Ike', 'Jake', 'Kit', 'Levi', 'Mack', 'Ned', 'Otis', 'Pete', 'Quinn', 'Reno', 'Sam', 'Tex', 'Ulysses', 'Vince', 'Wade', 'Wyatt', 'Zeke', 'Jesse', 'Doc', 'Billy', 'Cassidy', 'Colt', 'Boone'],
+    femaleNames: ['Annie', 'Belle', 'Callie', 'Daisy', 'Emma', 'Faith', 'Grace', 'Hattie', 'Ida', 'Jessie', 'Kate', 'Lila', 'Mae', 'Nora', 'Opal', 'Pearl', 'Rose', 'Sadie', 'Tess', 'Una', 'Vera', 'Winnie', 'Calamity', 'Abilene', 'Clementine', 'Loretta', 'Maybelle'],
+    characterEmojis: ['🤠', '🧔', '👨', '👦', '👴', '👱', '👮', '👷', '💂', '🏇', '🚶', '🏃', '🕺', '🤵', '🎅', '🧍', '👩', '👧', '👵', '🧕', '👰', '💃', '💁', '🙋', '💇', '💆', '🧗', '🤰', '👸', '🧖'],
+    maleEmojis: ['🤠', '🧔', '👨', '👦', '👴', '👱', '👮', '👷', '💂', '🏇', '🚶', '🏃', '🕺', '🤵', '🎅', '🧍'],
+    femaleEmojis: ['👩', '👧', '👵', '🧕', '👰', '💃', '💁', '🙋', '💇', '💆', '🚶', '🏃', '🧗', '🤰', '👸', '🧖'],
   },
 
   jungle: {
@@ -161,9 +173,9 @@ export const THEMES: Record<string, ThemeInfo> = {
       // Objetos FIJOS
       createObj('idol', 'Ídolo de Piedra', '🗿', false),
       createObj('vine', 'Liana Colgante', '🌿', false),
-      createObj('machete', 'Machete de Explorador', '🗡️', false),
+      createObj('machete', 'Machete de Explorador', '🗡', false),
       createObj('snake', 'Serpiente Venenosa', '🐍', false),
-      createObj('spider', 'Tarántula', '🕷️', false),
+      createObj('spider', 'Tarántula', '🕷', false),
       createObj('mushroom', 'Hongo Gigante', '🍄', false),
       createObj('ruin_block', 'Bloque Arqueológico', '🪨', false),
       createObj('campfire', 'Fogata de Campamento', '🔥', false),
@@ -171,8 +183,11 @@ export const THEMES: Record<string, ThemeInfo> = {
       createObj('chest', 'Cofre Ancestral', '📦', false),
       createObj('flower', 'Orquídea Salvaje', '🌺', false),
     ],
-    maleNames: ['Akali', 'Bram', 'Chiko', 'Dayo', 'Emeka', 'Femi', 'Gamba', 'Haruki', 'Idris', 'Jomo', 'Kojo', 'Lebo', 'Musa', 'Nkosi', 'Obinna', 'Piri', 'Quame', 'Riku', 'Seun', 'Tomi', 'Uche', 'Vito', 'Wanjiru'],
-    femaleNames: ['Ama', 'Bintu', 'Chisom', 'Dede', 'Esi', 'Fatou', 'Gomo', 'Hawa', 'Isoke', 'Joyita', 'Kesia', 'Ladi', 'Mina', 'Nadia', 'Ọlá', 'Pita', 'Rima', 'Sade', 'Tola', 'Uyi', 'Vena', 'Wura', 'Yemi', 'Zuri'],
+    maleNames: ['Akali', 'Bram', 'Chiko', 'Dayo', 'Emeka', 'Femi', 'Gamba', 'Haruki', 'Idris', 'Jomo', 'Kojo', 'Lebo', 'Musa', 'Nkosi', 'Obinna', 'Piri', 'Quame', 'Riku', 'Seun', 'Tomi', 'Uche', 'Vito', 'Wanjiru', 'Tarzan', 'Mowgli', 'Kael', 'Ranger', 'Hunter'],
+    femaleNames: ['Ama', 'Bintu', 'Chisom', 'Dede', 'Esi', 'Fatou', 'Gomo', 'Hawa', 'Isoke', 'Joyita', 'Kesia', 'Ladi', 'Mina', 'Nadia', 'Ọlá', 'Pita', 'Rima', 'Sade', 'Tola', 'Uyi', 'Vena', 'Wura', 'Yemi', 'Zuri', 'Jane', 'Lara', 'Kiara', 'Nala', 'Sita'],
+    characterEmojis: ['🧗', '🏃', '🚶', '🧔', '👨', '👦', '👴', '👱', '👳', '👲', '🏊', '🏄', '🧍', '🧎', '🧙', '🕺', '👩', '👧', '👵', '🧕', '🧝', '🧚', '🧜', '🧘', '🤸', '💁', '🙋', '💃'],
+    maleEmojis: ['🧗', '🏃', '🚶', '🧔', '👨', '👦', '👴', '👱', '👳', '👲', '🏊', '🏄', '🧍', '🧎', '🧙', '🕺'],
+    femaleEmojis: ['👩', '👧', '👵', '🧕', '🧝', '🧚', '🧜', '🧙', '🧗', '🏊', '🏄', '🧘', '🤸', '💁', '🙋', '💃'],
   },
 
   spooky: {
@@ -185,24 +200,27 @@ export const THEMES: Record<string, ThemeInfo> = {
     zones: ['Mansión', 'Cripta', 'Cementerio', 'Laboratorio Maldito', 'Torres del Campanario', 'Sótano', 'Granero', 'Bosque Tenebroso'],
     objects: [
       // Objetos OCUPABLES
-      createObj('coffin', 'Ataúd de Vampiro', '⚰️', true),
+      createObj('coffin', 'Ataúd de Vampiro', '⚰', true),
       createObj('chair', 'Sillón Victoriano', '🪑', true),
-      createObj('bed', 'Cama Tenebrosa', '🛏️', true),
+      createObj('bed', 'Cama Tenebrosa', '🛏', true),
 
       // Objetos FIJOS
       createObj('tombstone', 'Lápida Gótica', '🪦', false),
       createObj('cauldron', 'Caldero Burbujeante', '🍲', false),
       createObj('bat', 'Murciélago', '🦇', false),
-      createObj('spider', 'Araña Tejedora', '🕷️', false),
-      createObj('candle', 'Candelabro Antiguo', '🕯️', false),
+      createObj('spider', 'Araña Tejedora', '🕷', false),
+      createObj('candle', 'Candelabro Antiguo', '🕯', false),
       createObj('skull', 'Calavera Hechizada', '💀', false),
       createObj('mirror', 'Espejo Roto', '🪞', false),
-      createObj('poison', 'Frasco de Veneno', '☠️', false),
+      createObj('poison', 'Frasco de Veneno', '☠', false),
       createObj('trap', 'Trampa de Mordaza', '🪤', false),
       createObj('potion', 'Poción Misteriosa', '🧪', false),
     ],
-    maleNames: ['Ambrose', 'Balthazar', 'Caspian', 'Dorian', 'Elias', 'Faustus', 'Gregor', 'Hector', 'Igor', 'Jasper', 'Lestat', 'Malachar', 'Nikolai', 'Orpheus', 'Phineas', 'Quillon', 'Ravenwood', 'Silas', 'Thaddeus', 'Ulric', 'Vladimir', 'Wentworth'],
-    femaleNames: ['Agatha', 'Belladonna', 'Cassandra', 'Desdemona', 'Elvira', 'Freya', 'Gwendolyn', 'Hecate', 'Isadora', 'Jezebel', 'Kallista', 'Lilith', 'Morgana', 'Nightshade', 'Ophelia', 'Prudence', 'Ravenna', 'Sabrina', 'Thessaly', 'Ursula', 'Vesper', 'Winifred', 'Xena', 'Ysolde'],
+    maleNames: ['Ambrose', 'Balthazar', 'Caspian', 'Dorian', 'Elias', 'Faustus', 'Gregor', 'Hector', 'Igor', 'Jasper', 'Lestat', 'Malachar', 'Nikolai', 'Orpheus', 'Phineas', 'Quillon', 'Ravenwood', 'Silas', 'Thaddeus', 'Ulric', 'Vladimir', 'Wentworth', 'Dracula', 'Frankenstein', 'Lucian', 'Barnabas'],
+    femaleNames: ['Agatha', 'Belladonna', 'Cassandra', 'Desdemona', 'Elvira', 'Freya', 'Gwendolyn', 'Hecate', 'Isadora', 'Jezebel', 'Kallista', 'Lilith', 'Morgana', 'Nightshade', 'Ophelia', 'Prudence', 'Ravenna', 'Sabrina', 'Thessaly', 'Ursula', 'Vesper', 'Winifred', 'Xena', 'Ysolde', 'Morticia', 'Wednesday', 'Carmilla'],
+    characterEmojis: ['🧙', '🧛', '🧟', '🧌', '👺', '👹', '👻', '🧔', '👨', '👦', '👴', '👱', '🦹', '🤡', '🤵', '🚶', '🧝', '🧚', '👩', '👧', '👵', '🧕', '👰', '💃', '💁', '🙋', '🧖', '🧗'],
+    maleEmojis: ['🧙', '🧛', '🧟', '🧌', '👺', '👹', '👻', '🧔', '👨', '👦', '👴', '👱', '🦹', '🤡', '🤵', '🚶'],
+    femaleEmojis: ['🧙', '🧛', '🧟', '🧝', '🧚', '🦹', '👩', '👧', '👵', '🧕', '👰', '💃', '💁', '🙋', '🧖', '🧗'],
   },
 
   detective: {
@@ -216,9 +234,9 @@ export const THEMES: Record<string, ThemeInfo> = {
     objects: [
       // Objetos OCUPABLES
       createObj('armchair', 'Butaca de Tapizado', '🪑', true),
-      createObj('sofa', 'Sofá de Tres Plazas', '🛋️', true),
-      createObj('bed', 'Cama de Hierro Forjado', '🛏️', true),
-      createObj('desk_chair', 'Silla de Escritorio', '🪑', true),
+      createObj('sofa', 'Sofá de Tres Plazas', '🛋', true),
+      createObj('bed', 'Cama de Hierro Forjado', '🛏', true),
+      createObj('desk_chair', 'Silla de Escritorio', '💺', true),
 
       // Objetos FIJOS
       createObj('magnifying_glass', 'Lupa de Detective', '🔍', false),
@@ -229,13 +247,16 @@ export const THEMES: Record<string, ThemeInfo> = {
       createObj('fireplace', 'Chimenea de Piedra', '🔥', false),
       createObj('bookcase', 'Estantería de Roble', '📚', false),
       createObj('globe', 'Globos Terráqueo', '🌍', false),
-      createObj('suit_armor', 'Armadura Medieval', '🛡️', false),
-      createObj('antar', 'Antorcha de Pared', '🕯️', false),
+      createObj('suit_armor', 'Armadura Medieval', '🛡', false),
+      createObj('antar', 'Antorcha de Pared', '🕯', false),
       createObj('desk', 'Escritorio de Nogal', '🪵', false),
-      createObj('clock', 'Reloj de Péndulo', '🕰️', false),
+      createObj('clock', 'Reloj de Péndulo', '🕰', false),
     ],
-    maleNames: ['Sherlock', 'Watson', 'Holmes', 'Poirot', 'Marlowe', 'Mason', 'Dupin', 'Father', 'Montague', 'Inspector', 'Constable', 'Bryant', 'Cedric', 'Dermont', 'Ernest', 'Frederick', 'George', 'Henry', 'John', 'William'],
-    femaleNames: ['Agatha', 'Miss', 'Marple', 'Villiers', 'Russell', 'Davies', 'Evans', 'Bennett', 'Clara', 'Eleanor', 'Jane', 'Ruth', 'Sara', 'Lucy', 'Anna', 'Emma', 'Sophie', 'Charlotte', 'Emily', 'Victoria'],
+    maleNames: ['Sherlock', 'Watson', 'Holmes', 'Poirot', 'Marlowe', 'Mason', 'Dupin', 'Father', 'Montague', 'Inspector', 'Constable', 'Bryant', 'Cedric', 'Dermont', 'Ernest', 'Frederick', 'George', 'Henry', 'John', 'William', 'Lupin', 'Fletcher', 'Columbo', 'Kojak', 'Spade'],
+    femaleNames: ['Agatha', 'Miss', 'Marple', 'Villiers', 'Russell', 'Davies', 'Evans', 'Bennett', 'Clara', 'Eleanor', 'Jane', 'Ruth', 'Sara', 'Lucy', 'Anna', 'Emma', 'Sophie', 'Charlotte', 'Emily', 'Victoria', 'Nancy', 'Jessica', 'Veronica', 'Enola', 'Clarice'],
+    characterEmojis: ['🕵', '👮', '💂', '👨', '👦', '👴', '🧔', '👱', '🤵', '👲', '👳', '🚶', '🏃', '🧍', '🦹', '👷', '👩', '👧', '👵', '👸', '🧕', '👰', '💃', '💁', '🙋', '💇', '💆', '🧗', '🧖'],
+    maleEmojis: ['🕵', '👮', '💂', '👨', '👦', '👴', '🧔', '👱', '🤵', '👲', '👳', '🚶', '🏃', '🧍', '🦹', '👷'],
+    femaleEmojis: ['👩', '👧', '👵', '👸', '🧕', '👰', '💃', '💁', '🙋', '💇', '💆', '🚶', '🏃', '🧗', '🦹', '🧖'],
   },
 
   egypt: {
@@ -249,7 +270,7 @@ export const THEMES: Record<string, ThemeInfo> = {
     objects: [
       // Objetos OCUPABLES
       createObj('throne_eg', 'Trono del Faraón', '👑', true),
-      createObj('bed_eg', 'Litera de Papiro', '🛏️', true),
+      createObj('bed_eg', 'Litera de Papiro', '🛏', true),
       createObj('bench_eg', 'Banco de Piedra', '🪑', true),
       // Objetos FIJOS
       createObj('sphinx', 'Esfinge', '🗿', false),
@@ -264,8 +285,11 @@ export const THEMES: Record<string, ThemeInfo> = {
       createObj('statue_eg', 'Estatua de Anubis', '🐺', false),
       createObj('well_eg', 'Pozo del Nilo', '⛲', false),
     ],
-    maleNames: ['Amenhotep', 'Ramsés', 'Tutankamón', 'Imhotep', 'Seti', 'Horus', 'Anubis', 'Khaemwaset', 'Ptah', 'Osiris', 'Thutmose', 'Seneb', 'Khufu', 'Djoser', 'Ahmose', 'Narmer'],
-    femaleNames: ['Nefertiti', 'Cleopatra', 'Hatshepsut', 'Nefertari', 'Isis', 'Bastet', 'Sekhmet', 'Merit', 'Tiye', 'Ankhesenamón', 'Sobekneferu', 'Mut', 'Hathor', 'Kiya', 'Sitamen', 'Ahhotep'],
+    maleNames: ['Amenhotep', 'Ramsés', 'Tutankamón', 'Imhotep', 'Seti', 'Horus', 'Anubis', 'Khaemwaset', 'Ptah', 'Osiris', 'Thutmose', 'Seneb', 'Khufu', 'Djoser', 'Ahmose', 'Narmer', 'Akhenatón', 'Horemheb', 'Snefru', 'Menkaura'],
+    femaleNames: ['Nefertiti', 'Cleopatra', 'Hatshepsut', 'Nefertari', 'Isis', 'Bastet', 'Sekhmet', 'Merit', 'Tiye', 'Ankhesenamón', 'Sobekneferu', 'Mut', 'Hathor', 'Kiya', 'Sitamen', 'Ahhotep', 'Twosret', 'Khentkaus', 'Meritaten'],
+    characterEmojis: ['🤴', '👳', '🧔', '👨', '👦', '👴', '👱', '💂', '👲', '🧙', '🧞', '🚶', '🏃', '🧍', '🧎', '🕺', '👸', '🧕', '👩', '👧', '👵', '👰', '🧚', '🧜', '🧝', '💃', '💁', '🙋', '🧘', '🧖', '🧗'],
+    maleEmojis: ['🤴', '👳', '🧔', '👨', '👦', '👴', '👱', '💂', '👲', '🧙', '🧞', '🚶', '🏃', '🧍', '🧎', '🕺'],
+    femaleEmojis: ['👸', '🧕', '👩', '👧', '👵', '👰', '🧚', '🧜', '🧝', '🧙', '💃', '💁', '🙋', '🧘', '🧖', '🧗'],
   },
 
   cyberpunk: {
@@ -278,9 +302,9 @@ export const THEMES: Record<string, ThemeInfo> = {
     zones: ['Nivel Bajo', 'Azotea', 'Arcade', 'Laboratorio Clandestino', 'Estación de Metro', 'Bar de Neón', 'Servidores', 'Taller', 'Mercado Negro'],
     objects: [
       // Objetos OCUPABLES
-      createObj('capsule_cp', 'Cápsula de Carga', '❄️', true),
+      createObj('capsule_cp', 'Cápsula de Carga', '❄', true),
       createObj('gaming_chair', 'Silla Gaming', '💺', true),
-      createObj('bed_cp', 'Cama Modular', '🛏️', true),
+      createObj('bed_cp', 'Cama Modular', '🛏', true),
       // Objetos FIJOS
       createObj('drone', 'Dron Vigilante', '🛸', false),
       createObj('neon', 'Cartel de Neón', '💡', false),
@@ -288,14 +312,17 @@ export const THEMES: Record<string, ThemeInfo> = {
       createObj('terminal_cp', 'Terminal Hackeada', '💻', false),
       createObj('cable_cp', 'Maraña de Cables', '🔌', false),
       createObj('camera_cp', 'Cámara de Seguridad', '📷', false),
-      createObj('bike_cp', 'Moto Voladora', '🏍️', false),
-      createObj('barrel_cp', 'Bidón Tóxico', '🛢️', false),
+      createObj('bike_cp', 'Moto Voladora', '🏍', false),
+      createObj('barrel_cp', 'Bidón Tóxico', '🛢', false),
       createObj('antenna', 'Antena Repetidora', '📡', false),
       createObj('chip', 'Chip de Datos', '💾', false),
       createObj('robot_arm', 'Brazo Robótico', '🦾', false),
     ],
-    maleNames: ['Kai', 'Ryo', 'Dex', 'Juno', 'Kaito', 'Ren', 'Seth', 'Vex', 'Hiro', 'Dante', 'Kira', 'Zero', 'Jax', 'Neo', 'Enzo', 'Ravi'],
-    femaleNames: ['Nova', 'Yuki', 'Akira', 'Lena', 'Mira', 'Suki', 'Vera', 'Iris', 'Cleo', 'Nadia', 'Rin', 'Saya', 'Aiko', 'Luna', 'Zoe', 'Eva'],
+    maleNames: ['Kai', 'Ryo', 'Dex', 'Juno', 'Kaito', 'Ren', 'Seth', 'Vex', 'Hiro', 'Dante', 'Kira', 'Zero', 'Jax', 'Neo', 'Enzo', 'Ravi', 'Tetsuo', 'Deckard', 'Corvo', 'Gibson', 'Case'],
+    femaleNames: ['Nova', 'Yuki', 'Akira', 'Lena', 'Mira', 'Suki', 'Vera', 'Iris', 'Cleo', 'Nadia', 'Rin', 'Saya', 'Aiko', 'Luna', 'Zoe', 'Eva', 'Motoko', 'Trinity', 'Judy', 'Panam', 'Alt'],
+    characterEmojis: ['🥷', '🦹', '🦸', '👨', '👦', '👴', '🧔', '👱', '👮', '👷', '💂', '🚶', '🏃', '🧗', '🧍', '🧎', '👩', '👧', '👵', '🧕', '👰', '💁', '🙋', '💇', '🧘', '🤸', '🧖', '💃'],
+    maleEmojis: ['🥷', '🦹', '🦸', '👨', '👦', '👴', '🧔', '👱', '👮', '👷', '💂', '🚶', '🏃', '🧗', '🧍', '🧎'],
+    femaleEmojis: ['🦹', '🦸', '👩', '👧', '👵', '🧕', '👰', '💁', '🙋', '💇', '🧗', '🧘', '🤸', '🧖', '💃', '🏃'],
   },
 
   feudal: {
@@ -309,23 +336,26 @@ export const THEMES: Record<string, ThemeInfo> = {
     objects: [
       // Objetos OCUPABLES
       createObj('tatami', 'Tatami', '🛖', true),
-      createObj('futon', 'Futón', '🛏️', true),
+      createObj('futon', 'Futón', '🛏', true),
       createObj('bench_jp', 'Banco de Madera', '🪑', true),
       // Objetos FIJOS
-      createObj('katana', 'Katana', '🗡️', false),
+      createObj('katana', 'Katana', '🗡', false),
       createObj('bonsai', 'Bonsái', '🌳', false),
       createObj('lantern', 'Farolillo', '🏮', false),
-      createObj('shuriken', 'Shuriken', '✴️', false),
+      createObj('shuriken', 'Shuriken', '✴', false),
       createObj('carp', 'Carpa Koi', '🐟', false),
       createObj('cherry', 'Cerezo en Flor', '🌸', false),
-      createObj('armor_jp', 'Armadura Samurái', '🛡️', false),
+      createObj('armor_jp', 'Armadura Samurái', '🛡', false),
       createObj('scroll_jp', 'Pergamino Caligráfico', '📜', false),
       createObj('tea', 'Tetera de Té', '🍵', false),
       createObj('gong', 'Gong del Templo', '🔔', false),
       createObj('bamboo', 'Caña de Bambú', '🎋', false),
     ],
-    maleNames: ['Hiroshi', 'Kenji', 'Takeshi', 'Akira', 'Daichi', 'Hayato', 'Isamu', 'Jiro', 'Katsuro', 'Masaru', 'Noboru', 'Osamu', 'Riku', 'Sora', 'Taro', 'Yuji'],
-    femaleNames: ['Yuki', 'Sakura', 'Hana', 'Aiko', 'Emi', 'Keiko', 'Miyu', 'Naoko', 'Rin', 'Saki', 'Tomoe', 'Ume', 'Yoko', 'Akane', 'Chiyo', 'Haruka'],
+    maleNames: ['Hiroshi', 'Kenji', 'Takeshi', 'Akira', 'Daichi', 'Hayato', 'Isamu', 'Jiro', 'Katsuro', 'Masaru', 'Noboru', 'Osamu', 'Riku', 'Sora', 'Taro', 'Yuji', 'Musashi', 'Nobunaga', 'Ieyasu', 'Hanzo', 'Yukimura'],
+    femaleNames: ['Yuki', 'Sakura', 'Hana', 'Aiko', 'Emi', 'Keiko', 'Miyu', 'Naoko', 'Rin', 'Saki', 'Tomoe', 'Ume', 'Yoko', 'Akane', 'Chiyo', 'Haruka', 'Oichi', 'Ina', 'Chiyome', 'Murasaki', 'Komachi'],
+    characterEmojis: ['🥷', '🤴', '👲', '🧔', '👨', '👦', '👴', '👱', '💂', '👳', '🧘', '🚶', '🏃', '🧍', '🧎', '🤺', '👸', '👩', '👧', '👵', '🧕', '👰', '💃', '💁', '🙋', '💇', '🧖', '🧚', '🧝', '🤸'],
+    maleEmojis: ['🥷', '🤴', '👲', '🧔', '👨', '👦', '👴', '👱', '💂', '👳', '🧘', '🚶', '🏃', '🧍', '🧎', '🤺'],
+    femaleEmojis: ['👸', '👩', '👧', '👵', '🧕', '👰', '💃', '💁', '🙋', '💇', '🧘', '🧖', '🧚', '🧝', '🚶', '🤸'],
   },
 
   zombie: {
@@ -338,24 +368,27 @@ export const THEMES: Record<string, ThemeInfo> = {
     zones: ['Refugio', 'Hospital', 'Supermercado', 'Metro Abandonado', 'Azotea', 'Comisaría', 'Taller', 'Campamento', 'Farmacia'],
     objects: [
       // Objetos OCUPABLES
-      createObj('stretcher', 'Camilla', '🛏️', true),
+      createObj('stretcher', 'Camilla', '🛏', true),
       createObj('sleeping_bag', 'Saco de Dormir', '🎒', true),
       createObj('chair_zb', 'Silla Plegable', '🪑', true),
       // Objetos FIJOS
       createObj('barricade', 'Barricada', '🚧', false),
-      createObj('canister', 'Bidón de Gasolina', '🛢️', false),
+      createObj('canister', 'Bidón de Gasolina', '🛢', false),
       createObj('syringe', 'Jeringuilla', '💉', false),
       createObj('can_food', 'Lata de Conserva', '🥫', false),
       createObj('radio_zb', 'Radio a Pilas', '📻', false),
       createObj('flashlight', 'Linterna', '🔦', false),
       createObj('blood', 'Mancha de Sangre', '🩸', false),
-      createObj('crowbar', 'Palanca', '⛏️', false),
+      createObj('crowbar', 'Palanca', '⛏', false),
       createObj('mask_zb', 'Máscara Antigás', '😷', false),
       createObj('siren', 'Sirena Rota', '🚨', false),
       createObj('bones', 'Restos Óseos', '🦴', false),
     ],
-    maleNames: ['Rick', 'Daryl', 'Glenn', 'Morgan', 'Eugene', 'Carl', 'Hershel', 'Shane', 'Bob', 'Tyreese', 'Aaron', 'Gabriel', 'Spencer', 'Heath', 'Denny', 'Marcus'],
-    femaleNames: ['Michonne', 'Carol', 'Maggie', 'Sasha', 'Rosita', 'Andrea', 'Beth', 'Tara', 'Enid', 'Jessie', 'Deanna', 'Lori', 'Amy', 'Elena', 'Nadia', 'Rosa'],
+    maleNames: ['Rick', 'Daryl', 'Glenn', 'Morgan', 'Eugene', 'Carl', 'Hershel', 'Shane', 'Bob', 'Tyreese', 'Aaron', 'Gabriel', 'Spencer', 'Heath', 'Denny', 'Marcus', 'Abraham', 'Negan', 'Dwight', 'Ezekiel', 'Jesus'],
+    femaleNames: ['Michonne', 'Carol', 'Maggie', 'Sasha', 'Rosita', 'Andrea', 'Beth', 'Tara', 'Enid', 'Jessie', 'Deanna', 'Lori', 'Amy', 'Elena', 'Nadia', 'Rosa', 'Alpha', 'Jadis', 'Laura', 'Kelly', 'Connie'],
+    characterEmojis: ['🧟', '👮', '👷', '💂', '🧔', '👨', '👦', '👴', '👱', '👲', '👳', '🏃', '🚶', '🧗', '🦸', '🧍', '👩', '👧', '👵', '🧕', '👰', '🦹', '💁', '🙋', '🧘', '🤸', '🧖'],
+    maleEmojis: ['🧟', '👮', '👷', '💂', '🧔', '👨', '👦', '👴', '👱', '👲', '👳', '🏃', '🚶', '🧗', '🦸', '🧍'],
+    femaleEmojis: ['🧟', '👩', '👧', '👵', '🧕', '👰', '🏃', '🚶', '🧗', '🦸', '🦹', '💁', '🙋', '🧘', '🤸', '🧖'],
   },
 
   olympics: {
@@ -369,23 +402,26 @@ export const THEMES: Record<string, ThemeInfo> = {
     objects: [
       // Objetos OCUPABLES
       createObj('bench_ol', 'Banquillo', '🪑', true),
-      createObj('stretcher_ol', 'Camilla Médica', '🛏️', true),
-      createObj('podium seat', 'Grada VIP', '💺', true),
+      createObj('stretcher_ol', 'Camilla Médica', '🛏', true),
+      createObj('podium_seat', 'Grada VIP', '💺', true),
       // Objetos FIJOS
       createObj('ball', 'Balón', '⚽', false),
       createObj('trophy', 'Trofeo', '🏆', false),
-      createObj('stopwatch', 'Cronómetro', '⏱️', false),
+      createObj('stopwatch', 'Cronómetro', '⏱', false),
       createObj('hurdle', 'Valla', '🚧', false),
-      createObj('weights', 'Pesa Olímpica', '🏋️', false),
+      createObj('weights', 'Pesa Olímpica', '🏋', false),
       createObj('torch_ol', 'Antorcha Olímpica', '🔥', false),
       createObj('medal', 'Medalla de Oro', '🥇', false),
-      createObj('pool_lane', 'Calle de Piscina', '🏊', false),
+      createObj('pool_lane', 'Calle de Piscina', '🌊', false),
       createObj('racket', 'Raqueta', '🎾', false),
       createObj('flag_ol', 'Bandera', '🚩', false),
       createObj('whistle', 'Silbato', '📯', false),
     ],
-    maleNames: ['Usain', 'Michael', 'Carlitos', 'Diego', 'Pau', 'Rafa', 'Iker', 'Marc', 'Leo', 'Andrés', 'Bruno', 'Hugo', 'Iván', 'Nico', 'Pablo', 'Sergio'],
-    femaleNames: ['Simone', 'Mireia', 'Carolina', 'Paula', 'Lucía', 'Marta', 'Sara', 'Elena', 'Claudia', 'Julia', 'Aina', 'Laia', 'Noa', 'Vega', 'Alba', 'Irene'],
+    maleNames: ['Usain', 'Michael', 'Carlitos', 'Diego', 'Pau', 'Rafa', 'Iker', 'Marc', 'Leo', 'Andrés', 'Bruno', 'Hugo', 'Iván', 'Nico', 'Pablo', 'Sergio', 'Roger', 'Novak', 'Jesse', 'Eliud', 'Armand'],
+    femaleNames: ['Simone', 'Mireia', 'Carolina', 'Paula', 'Lucía', 'Marta', 'Sara', 'Elena', 'Claudia', 'Julia', 'Aina', 'Laia', 'Noa', 'Vega', 'Alba', 'Irene', 'Serena', 'Nadia', 'Katie', 'Yulimar', 'Sifan'],
+    characterEmojis: ['🏃', '🏊', '🏇', '🏂', '🏄', '🚴', '🚵', '🤸', '🤼', '🤽', '🤾', '🤺', '🧗', '👨', '👦', '🚶', '🧘', '👩', '👧', '👵', '💃', '💁'],
+    maleEmojis: ['🏃', '🏊', '🏇', '🏂', '🏄', '🚴', '🚵', '🤸', '🤼', '🤽', '🤾', '🤺', '🧗', '👨', '👦', '🚶'],
+    femaleEmojis: ['🏃', '🏊', '🏄', '🚴', '🚵', '🤸', '🤽', '🤾', '🧗', '🧘', '👩', '👧', '👵', '💃', '💁', '🚶'],
   },
 
   kitchen: {
@@ -399,8 +435,8 @@ export const THEMES: Record<string, ThemeInfo> = {
     objects: [
       // Objetos OCUPABLES
       createObj('stool_kt', 'Taburete Alto', '🪑', true),
-      createObj('bench_kt', 'Banco Corrido', '🛋️', true),
-      createObj('bed_kt', 'Catre de Descanso', '🛏️', true),
+      createObj('bench_kt', 'Banco Corrido', '🛋', true),
+      createObj('bed_kt', 'Catre de Descanso', '🛏', true),
       // Objetos FIJOS
       createObj('pan', 'Sartén', '🍳', false),
       createObj('knife', 'Cuchillo Chef', '🔪', false),
@@ -414,8 +450,11 @@ export const THEMES: Record<string, ThemeInfo> = {
       createObj('coffee', 'Cafetera', '☕', false),
       createObj('barrel_kt', 'Barril de Cerveza', '🍺', false),
     ],
-    maleNames: ['Ferran', 'José', 'Alberto', 'Quique', 'Martín', 'Jordi', 'Pepe', 'Dabiz', 'Andoni', 'Joan', 'Paco', 'Manu', 'Diego', 'Santi', 'Oriol', 'Bruno'],
-    femaleNames: ['Carme', 'Elena', 'Lucía', 'Marta', 'Anna', 'Laia', 'Clara', 'Julia', 'Sofía', 'Paula', 'Núria', 'Aina', 'Júlia', 'Maria', 'Sara', 'Eva'],
+    maleNames: ['Ferran', 'José', 'Alberto', 'Quique', 'Martín', 'Jordi', 'Pepe', 'Dabiz', 'Andoni', 'Joan', 'Paco', 'Manu', 'Diego', 'Santi', 'Oriol', 'Bruno', 'Gordon', 'Paul', 'Massimo', 'Alain', 'Thomas'],
+    femaleNames: ['Carme', 'Elena', 'Lucía', 'Marta', 'Anna', 'Laia', 'Clara', 'Julia', 'Sofía', 'Paula', 'Núria', 'Aina', 'Júlia', 'Maria', 'Sara', 'Eva', 'Dominique', 'Anne-Sophie', 'Nadia', 'Alice', 'Clare'],
+    characterEmojis: ['👨', '👦', '👴', '🧔', '👱', '👲', '👳', '💂', '👮', '👷', '🤵', '🤴', '🚶', '🏃', '🧍', '🧓', '👩', '👧', '👵', '🧕', '👰', '👸', '💁', '🙋', '💇', '💆', '💃', '🧗', '🧖', '🧘'],
+    maleEmojis: ['👨', '👦', '👴', '🧔', '👱', '👲', '👳', '💂', '👮', '👷', '🤵', '🤴', '🚶', '🏃', '🧍', '🧓'],
+    femaleEmojis: ['👩', '👧', '👵', '🧕', '👰', '👸', '💁', '🙋', '💇', '💆', '💃', '🚶', '🏃', '🧗', '🧖', '🧘'],
   },
 }
 
