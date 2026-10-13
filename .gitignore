@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# murdoku
+mapa.png
+mudoku.pdf
+reglas.txt
