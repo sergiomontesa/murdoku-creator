@@ -22,7 +22,7 @@ export const THEMES: Record<string, ThemeInfo> = {
   pirates: {
     id: 'pirates',
     name: 'Piratas',
-    emoji: '🏴‍☠️',
+    emoji: '🏴',
     description: 'Alta mar, tesoros ocultos y misterios en las Indias Occidentales',
     gradient: 'from-amber-600 via-orange-700 to-red-900',
     accentColor: '#F5A623',
@@ -226,7 +226,7 @@ export const THEMES: Record<string, ThemeInfo> = {
   detective: {
     id: 'detective',
     name: 'Detective',
-    emoji: '🕵️‍♂️',
+    emoji: '🕵',
     description: 'Misterios de investigación al estilo de Sherlock Holmes y Agatha Christie',
     gradient: 'from-gray-600 via-gray-800 to-gray-900',
     accentColor: '#6B7280',

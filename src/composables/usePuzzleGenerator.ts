@@ -64,7 +64,7 @@ function generateZones(
   const zones: Zone[] = []
   const colorShuffled = shuffle([...ZONE_COLORS])
   const namesSample = shuffle([...zoneNames]).slice(0, numZones)
-  const zoneEmojis = ['🚢', '⛵', '🏴‍☠️', '🏖️', '🌊', '⛰️', '🍺', '🪨', '🏰', '🌴']
+  const zoneEmojis = ['🚢', '⛵', '🏴', '🏖️', '🌊', '⛰️', '🍺', '🪨', '🏰', '🌴']
 
   const usedCells = new Set<string>()
   const allCells: [number, number][] = []

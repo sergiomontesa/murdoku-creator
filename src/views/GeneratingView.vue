@@ -18,7 +18,7 @@ const difficulty = getDifficulty(store.selectedDifficulty)
 // Pasos de generación para mostrar en la UI
 const steps = [
   { label: 'Diseñando el mapa', emoji: '🗺️', at: 0 },
-  { label: 'Creando personajes', emoji: '🧑‍✈️', at: 25 },
+  { label: 'Creando personajes', emoji: '🧑', at: 25 },
   { label: 'Distribuyendo objetos', emoji: '📦', at: 50 },
   { label: 'Redactando pistas', emoji: '📜', at: 75 },
   { label: '¡Puzzle listo!', emoji: '✨', at: 95 },
