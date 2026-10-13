@@ -2,21 +2,21 @@
 /**
  * Vista interactiva del mapa Murdoku.
  * El mapa presenta la riqueza geográfica de las zonas y los objetos distribuidos
- * (distiñendo entre ocupables y no ocupables) siguiendo mapa.png, murdoku.pdf y reglas.txt.
+ * (distiñendo entre ocupables y no ocupables) siguiendo las reglas del juego (reglas.txt).
  * El jugador puede deducir y colocar las fichas de los personajes o revelar la solución.
  */
 import { computed, ref, reactive, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   RotateCcw, Home, Users,
-  Book, EyeOff, Eye,
+  EyeOff, Eye,
   HelpCircle, CheckCircle2, AlertTriangle, Sparkles,
   Compass, Info, UserCheck, ZoomIn, ZoomOut, Clock,
   Lightbulb
 } from 'lucide-vue-next'
 import { usePuzzleStore } from '@/stores/puzzle'
 import { getTheme, getDifficulty } from '@/data/themes'
-import type { Zone, Character, ClueType, PlacedObject, MapObject } from '@/types/puzzle'
+import type { Zone, Character, Clue, ClueType, PlacedObject, MapObject } from '@/types/puzzle'
 
 const router = useRouter()
 const store = usePuzzleStore()
@@ -45,27 +45,31 @@ const playerPlacements = reactive<Record<string, { row: number; col: number }>>(
 const excludedCells = reactive<Record<string, boolean>>({})
 
 /** Pestaña activa del panel auxiliar */
-const activeTab = ref<'clues' | 'suspects' | 'legend'>('clues')
+const activeTab = ref<'suspects' | 'legend'>('suspects')
 
 /** Filtros del panel de pistas */
 const clueQuery = ref('')
 const clueTypeFilter = ref<ClueType | 'all'>('all')
-const filteredClues = computed(() => {
-  const q = clueQuery.value.trim().toLowerCase()
-  return puzzle.value.clues.filter((clue) => {
-    if (clueTypeFilter.value !== 'all' && clue.type !== clueTypeFilter.value) return false
-    if (q && !(`${clue.characterName} ${clue.text}`.toLowerCase().includes(q))) return false
-    return true
-  })
+/** Pista de cada personaje indexada por characterId */
+const clueByCharacter = computed(() => {
+  const map = new Map<string, Clue>()
+  for (const clue of puzzle.value.clues) map.set(clue.characterId, clue)
+  return map
 })
 
 /** Mostrar solo sospechosos sin colocar */
 const showOnlyUnplaced = ref(false)
-const filteredSuspects = computed(() =>
-  showOnlyUnplaced.value
-    ? puzzle.value.characters.filter((c) => !playerPlacements[c.id])
-    : puzzle.value.characters
-)
+/** Sospechosos filtrados por colocacion, texto y tipo de pista */
+const filteredSuspects = computed(() => {
+  const q = clueQuery.value.trim().toLowerCase()
+  return puzzle.value.characters.filter((c) => {
+    if (showOnlyUnplaced.value && playerPlacements[c.id]) return false
+    const clue = clueByCharacter.value.get(c.id)
+    if (clueTypeFilter.value !== 'all' && clue?.type !== clueTypeFilter.value) return false
+    if (q && !(`${c.name} ${clue?.text ?? ''}`.toLowerCase().includes(q))) return false
+    return true
+  })
+})
 
 /** Mensaje de aviso/feedback cuando el usuario hace clic (ej. celda no ocupable) */
 const notificationMsg = ref<{ text: string; type: 'warning' | 'success' | 'info' } | null>(null)
@@ -110,6 +114,69 @@ const placedObjectMap = computed(() => {
   }
   return map
 })
+
+/** Mapa rapido "row,col" -> zoneId para bordes y etiquetas */
+const zoneIdGrid = computed(() => {
+  const map = new Map<string, string>()
+  for (const z of puzzle.value.zones) {
+    for (const [r, c] of z.cells) map.set(`${r},${c}`, z.id)
+  }
+  return map
+})
+
+/** Zonas indexadas por id */
+const zoneById = computed(() => new Map(puzzle.value.zones.map(z => [z.id, z])))
+
+/** Celda ancla (superior-izquierda) de cada zona para su etiqueta */
+const zoneLabelCell = computed(() => {
+  const anchors = new Map<string, Zone>()
+  for (const z of puzzle.value.zones) {
+    if (z.cells.length === 0) continue
+    let best: [number, number] = z.cells[0]
+    for (const [r, c] of z.cells) {
+      if (r < best[0] || (r === best[0] && c < best[1])) best = [r, c]
+    }
+    anchors.set(`${best[0]},${best[1]}`, z)
+  }
+  return anchors
+})
+
+/**
+ * Bordes de delimitacion de zona para una celda (0-indexed).
+ * Trazo grueso con el color de la zona donde cambia de zona, fino dentro.
+ */
+/** Etiquetas de zona posicionadas en px sobre el tablero (sin recortes).
+ * El overlay va detras de fichas (z-20), tesoro y descartes (z-10). */
+const zoneLabels = computed(() => {
+  const list: { id: string; name: string; color: string; top: number; left: number; fontSize: string }[] = []
+  for (const [key, zone] of zoneLabelCell.value) {
+    const [r, c] = key.split(',').map(Number)
+    list.push({
+      id: zone.id,
+      name: zone.name,
+      color: zone.color,
+      top: r * cellSize.value + 5,
+      left: 28 + c * cellSize.value + 3,
+      fontSize: cellSize.value > 40 ? '11px' : '9px',
+    })
+  }
+  return list
+})
+
+/** Bordes de delimitacion de zona (ver getZoneEdgeStyle) */
+function getZoneEdgeStyle(row: number, col: number) {
+  const n = puzzle.value.gridSize
+  const id = zoneIdGrid.value.get(`${row},${col}`)
+  const color = (id ? zoneById.value.get(id)?.color : undefined) ?? '#3a3550'
+  const same = (r: number, c: number) => zoneIdGrid.value.get(`${r},${c}`) === id
+  const edge = (border: boolean) => (border ? `2px solid ${color}` : `1px solid ${color}55`)
+  return {
+    borderTop: edge(row === 0 || !same(row - 1, col)),
+    borderRight: edge(col === n - 1 || !same(row, col + 1)),
+    borderBottom: edge(row === n - 1 || !same(row + 1, col)),
+    borderLeft: edge(col === 0 || !same(row, col - 1)),
+  }
+}
 
 /** Obtiene la zona correspondiente a una coordenada (0-indexed) */
 function getCellZone(row: number, col: number): Zone | undefined {
@@ -175,6 +242,71 @@ function selectCharacter(id: string) {
   }
 }
 
+/** Ficha arrastrada desde el panel (drag & drop) */
+const draggingCharacterId = ref<string | null>(null)
+
+/** Celda resaltada como destino durante el arrastre */
+const dropCell = ref<{ row: number; col: number } | null>(null)
+
+/**
+ * Coloca la ficha de un personaje en una celda (0-indexed).
+ * Reutilizada por el clic y por el arrastre.
+ * @returns true si la ficha quedo colocada
+ */
+function placeCharacter(charId: string, row: number, col: number): boolean {
+  const char = puzzle.value.characters.find(c => c.id === charId)
+  const cellObj = getCellObject(row, col)
+
+  if (cellObj && !cellObj.info.occupiable) {
+    notify(`No se puede ocupar: hay ${cellObj.info.name} (${cellObj.info.emoji}), que es un objeto fijo no ocupable.`, 'warning')
+    return false
+  }
+
+  moves.value++
+  delete excludedCells[`${row},${col}`]
+  playerPlacements[charId] = { row, col }
+  if (cellObj && cellObj.info.occupiable) {
+    notify(`¡${char?.name} colocado sobre ${cellObj.info.name.toLowerCase()}!`, 'success')
+  } else {
+    notify(`${char?.name} colocado en Fila ${row + 1}, Columna ${col + 1}.`, 'success')
+  }
+  if (selectedCharacterId.value === charId) selectedCharacterId.value = null
+  return true
+}
+
+/** Inicio del arrastre de un sospechoso hacia el mapa */
+function onSuspectDragStart(e: DragEvent, charId: string) {
+  draggingCharacterId.value = charId
+  selectedCharacterId.value = charId
+  if (e.dataTransfer) {
+    e.dataTransfer.setData('text/plain', charId)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+}
+
+/** Fin del arrastre (se coloque o no) */
+function onSuspectDragEnd() {
+  draggingCharacterId.value = null
+  dropCell.value = null
+}
+
+/** Paso sobre una celda durante el arrastre */
+function onCellDragOver(e: DragEvent, row: number, col: number) {
+  if (showSolution.value || !draggingCharacterId.value) return
+  e.preventDefault()
+  dropCell.value = { row, col }
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+}
+
+/** Soltado de la ficha sobre una celda del mapa */
+function onCellDrop(row: number, col: number) {
+  const charId = draggingCharacterId.value
+  draggingCharacterId.value = null
+  dropCell.value = null
+  if (!charId || showSolution.value) return
+  placeCharacter(charId, row, col)
+}
+
 /** Manejar clic en una celda del mapa */
 function handleCellClick(row: number, col: number) {
   if (showSolution.value) {
@@ -193,26 +325,7 @@ function handleCellClick(row: number, col: number) {
 
   // 2. Si hay un sospechoso seleccionado, intentar colocarlo
   if (selectedCharacterId.value) {
-    const char = puzzle.value.characters.find(c => c.id === selectedCharacterId.value)
-    const cellObj = getCellObject(row, col)
-
-    // REGLA CRÍTICA de reglas.txt: La cama, silla y hamaca se pueden ocupar.
-    // La fogata, árbol, flores, tiburón, saco, cerdo, lápida, caja, cuerda, barril, etc. NO se pueden ocupar
-    if (cellObj && !cellObj.info.occupiable) {
-      notify(`⛔ No se puede ocupar: hay ${cellObj.info.name} (${cellObj.info.emoji}), que es un objeto fijo no ocupable (reglas.txt).`, 'warning')
-      return
-    }
-
-    // Colocar la ficha
-    moves.value++
-    delete excludedCells[`${row},${col}`]
-    playerPlacements[selectedCharacterId.value] = { row, col }
-    if (cellObj && cellObj.info.occupiable) {
-      notify(`✅ ¡${char?.name} colocado sobre ${cellObj.info.name.toLowerCase()}!`, 'success')
-    } else {
-      notify(`✅ ${char?.name} colocado en Fila ${row + 1}, Columna ${col + 1}.`, 'success')
-    }
-    selectedCharacterId.value = null
+    placeCharacter(selectedCharacterId.value, row, col)
     return
   }
 
@@ -230,7 +343,6 @@ function handleCellClick(row: number, col: number) {
   }
 }
 
-/** Descolocar un sospechoso desde el panel */
 /** Marca o desmarca una casilla como descartada (clic derecho) */
 function toggleExclude(row: number, col: number) {
   if (showSolution.value) return
@@ -247,6 +359,7 @@ function isExcluded(row: number, col: number): boolean {
   return !!excludedCells[`${row},${col}`]
 }
 
+/** Descolocar un sospechoso desde el panel */
 function removeCharacterPlacement(charId: string) {
   moves.value++
   delete playerPlacements[charId]
@@ -498,7 +611,7 @@ function useHint() {
      <header class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-5 rounded-2xl glass border border-white/10 shadow-xl animate-fade-up">
        <!-- Datos del puzzle -->
        <div class="flex items-center gap-4">
-         <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-yellow-600/10 border border-amber-500/40 flex items-center justify-center text-3xl shadow-lg shadow-amber-500/10 flex-none">
+         <div class="w-14 h-14 rounded-2xl bg-linear-to-br from-amber-500/20 to-yellow-600/10 border border-amber-500/40 flex items-center justify-center text-3xl shadow-lg shadow-amber-500/10 flex-none">
            {{ theme.emoji }}
          </div>
          <div>
@@ -532,7 +645,7 @@ function useHint() {
            @click="showSolution = !showSolution"
            class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs lg:text-sm transition-all duration-200 shadow-md cursor-pointer"
            :class="showSolution
-             ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-dark-900 shadow-amber-500/25 ring-2 ring-amber-400/50 hover:bg-amber-400 active:scale-95'
+             ? 'bg-linear-to-r from-amber-500 to-yellow-400 text-dark-900 shadow-amber-500/25 ring-2 ring-amber-400/50 hover:bg-amber-400 active:scale-95'
              : 'glass border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 hover:border-amber-500/40 active:scale-95'"
            :title="showSolution ? 'Ocultar solución y volver al modo detective' : 'Revelar dónde estaba cada sospechoso y el tesoro'"
          >
@@ -609,7 +722,7 @@ function useHint() {
        <section class="xl:col-span-8 flex flex-col gap-4">
 
          <!-- Marco del mapa -->
-         <div class="glass rounded-2xl p-4 lg:p-6 border border-white/10 shadow-2xl shadow-inner relative overflow-hidden bg-gradient-to-b from-dark-800/90 to-dark-900/95 backdrop-blur-xl">
+         <div class="glass rounded-2xl p-4 lg:p-6 border border-white/10 shadow-2xl relative overflow-hidden bg-linear-to-b from-dark-800/90 to-dark-900/95 backdrop-blur-xl">
 
            <!-- Barra de controles y estado del mapa -->
            <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
@@ -685,7 +798,7 @@ function useHint() {
            </div>
 
            <!-- Contenedor scrollable del tablero con máxima riqueza gráfica -->
-           <div class="overflow-auto pb-4 pt-1 flex justify-center max-h-[720px] rounded-xl border border-white/5 p-2 bg-dark-950/80">
+           <div class="overflow-auto pb-4 pt-1 flex justify-center max-h-180 rounded-xl border border-white/5 p-2 bg-dark-950/80">
 
              <!-- TABLERO CON COORDENADAS (FILAS 1..N Y COLUMNAS 1..N) -->
              <div class="inline-flex flex-col select-none">
@@ -706,6 +819,17 @@ function useHint() {
                 <div
                   class="relative rounded-xl overflow-hidden border border-amber-500/30 shadow-2xl"
                 >
+                  <!-- Etiquetas de zona (capa de fondo, sin recortes) -->
+                  <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div
+                      v-for="label in zoneLabels"
+                      :key="label.id"
+                      class="absolute font-display font-black uppercase tracking-wider whitespace-nowrap opacity-50 leading-none"
+                      :style="{ top: `${label.top}px`, left: `${label.left}px`, color: label.color, fontSize: label.fontSize, textShadow: '0 1px 3px rgba(0,0,0,0.9)' }"
+                    >
+                      {{ label.name }}
+                    </div>
+                  </div>
                  <!-- Filas con índice lateral y celdas -->
                  <div
                    v-for="row in puzzle.gridSize"
@@ -725,18 +849,22 @@ function useHint() {
                        :id="`cell-${row}-${col}`"
                        @click="handleCellClick(row - 1, col - 1)"
                         @contextmenu.prevent="toggleExclude(row - 1, col - 1)"
+                        @dragover="onCellDragOver($event, row - 1, col - 1)"
+                        @drop.prevent="onCellDrop(row - 1, col - 1)"
                        @mouseenter="hoveredCell = { row: row - 1, col: col - 1 }"
                        @mouseleave="hoveredCell = null"
                        class="relative border transition-all duration-150 cursor-pointer flex flex-col items-center justify-center p-0.5 group overflow-hidden"
                        :style="{
                          width: `${cellSize}px`,
                          height: `${cellSize}px`,
-                         ...getZoneCellStyle(getCellZone(row - 1, col - 1))
+                         ...getZoneCellStyle(getCellZone(row - 1, col - 1)),
+                          ...getZoneEdgeStyle(row - 1, col - 1)
                        }"
                        :class="[
                          hoveredCell?.row === row - 1 && hoveredCell?.col === col - 1 ? 'ring-2 ring-amber-400 ring-inset z-20 brightness-125' : '',
                          isTreasureCell(row - 1, col - 1) ? 'ring-2 ring-yellow-400 bg-yellow-500/40 animate-pulse z-10' : '',
                           isConflictCell(row - 1, col - 1) ? 'ring-2 ring-red-500 ring-inset z-10' : '',
+                          (dropCell?.row === row - 1 && dropCell?.col === col - 1) ? 'ring-2 ring-emerald-400 ring-inset z-20 brightness-125' : '',
                           (hoveredCell && (hoveredCell.row === row - 1 || hoveredCell.col === col - 1)) ? 'crosshair-cell' : ''
                         ]"
                      >
@@ -809,7 +937,7 @@ function useHint() {
                        <!-- 3. TESORO (SI ESTÁ REVELADO Y ESTA ES LA CASILLA) -->
                        <div
                          v-else-if="isTreasureCell(row - 1, col - 1)"
-                         class="treasure-glow absolute inset-0.5 flex flex-col items-center justify-center z-30 rounded-lg animate-pulse animate-bounce border-2 border-yellow-400/50 shadow-[0_0_20px_rgba(250,204,21,0.6)]"
+                         class="treasure-glow absolute inset-0.5 flex flex-col items-center justify-center z-30 rounded-lg animate-bounce border-2 border-yellow-400/50 shadow-[0_0_20px_rgba(250,204,21,0.6)]"
                          title="¡EL TESORO ESTÁ AQUÍ!"
                        >
                          <span class="font-emoji text-2xl animate-bounce">💰</span>
@@ -891,7 +1019,7 @@ function useHint() {
          <transition name="fade">
            <div
              v-if="showSolution"
-             class="p-5 rounded-2xl glass border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-transparent shadow-xl animate-fade-up"
+             class="p-5 rounded-2xl glass border border-amber-500/30 bg-linear-to-r from-amber-500/10 via-yellow-500/5 to-transparent shadow-xl animate-fade-up"
            >
              <div class="flex items-center gap-3">
                <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl flex-none shadow">
@@ -900,7 +1028,7 @@ function useHint() {
                <div class="flex-1">
                  <div class="flex items-center gap-2">
                    <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">Coordenadas del Tesoro</span>
-                   <span class="text-xs text-gray-500">• Última casilla desocupada (reglas.txt)</span>
+                   <span class="text-xs text-gray-500">• El cruce de la última fila y columna libres (reglas.txt)</span>
                  </div>
                  <p class="font-mono text-xl font-black text-white mt-0.5">
                    Fila {{ puzzle.treasureRow }} · Columna {{ puzzle.treasureCol }}
@@ -924,9 +1052,8 @@ function useHint() {
          <div class="flex p-1 rounded-xl glass border border-white/5 w-full">
            <button
              v-for="tab in [
-               { id: 'clues', label: `Pistas (${puzzle.clues.length})`, icon: Book },
-               { id: 'suspects', label: `Sospechosos (${puzzle.characters.length})`, icon: Users },
-               { id: 'legend', label: 'Reglas (PDF)', icon: HelpCircle },
+                              { id: 'suspects', label: `Sospechosos (${puzzle.characters.length})`, icon: Users },
+               { id: 'legend', label: 'Reglas', icon: HelpCircle },
              ]"
              :key="tab.id"
              :id="`tab-${tab.id}`"
@@ -941,18 +1068,24 @@ function useHint() {
            </button>
          </div>
 
-         <!-- 1. PESTAÑA: PISTAS DEDUCTIVAS (LITERALES DE REGLAS.TXT) -->
-         <div v-if="activeTab === 'clues'" class="flex flex-col gap-2.5 animate-scale-in">
-           <div class="flex items-center justify-between text-xs text-gray-400 px-1">
-             <span>Testimonios oficiales para deducir las posiciones:</span>
-           </div>
+         <!-- 1. PESTAÑA: SOSPECHOSOS Y PISTAS -->
+          <div v-if="activeTab === 'suspects'" class="flex flex-col gap-3 animate-scale-in">
+            <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
+              <p class="font-bold flex items-center gap-1.5 mb-1">
+                <Sparkles class="w-3.5 h-3.5" />
+                ¿Cómo colocar sospechosos?
+              </p>
+              <p class="text-gray-300">
+                Arrastra un personaje hasta una casilla del mapa, o púlsalo para seleccionarlo y haz clic en una casilla. Clic derecho en una casilla la marca como descartada (X).
+              </p>
+            </div>
 
-           <div class="flex gap-2">
+            <div class="flex gap-2">
               <input
                 v-model="clueQuery"
                 type="text"
-                placeholder="Buscar pista o sospechoso..."
-                aria-label="Buscar pista"
+                placeholder="Buscar personaje o pista..."
+                aria-label="Buscar personaje o pista"
                 class="flex-1 min-w-0 glass rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-gray-200 placeholder:text-gray-600 outline-none focus:border-amber-500/50 transition-colors"
               />
               <select
@@ -969,106 +1102,80 @@ function useHint() {
                 <option value="special">Especial</option>
               </select>
             </div>
-            <p v-if="filteredClues.length === 0" class="text-center text-xs text-gray-500 py-4">Sin pistas para ese filtro.</p>
-            <div class="flex flex-col gap-2 max-h-[620px] overflow-y-auto pr-1">
-             <div
-               v-for="clue in filteredClues"
-               :key="clue.characterId"
-               class="glass rounded-xl border border-white/5 overflow-hidden"
-             >
-               <!-- Cabecera de la pista -->
-                <div class="w-full flex items-center gap-2.5 px-3.5 py-2.5">
-                 <div class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-none">
-                   <span class="text-sm">
-                     {{ puzzle.characters.find(c => c.id === clue.characterId)?.emoji ?? '🧑' }}
-                   </span>
-                 </div>
-                 <div class="flex-1 min-w-0">
-                   <p class="font-display font-bold text-xs text-white truncate">{{ clue.characterName }}</p>
-                   <p class="text-[10px] text-amber-400/90 font-medium">
-                     {{ getClueTypeLabel(clue.type) }}
-                   </p>
-                 </div>
-                </div>
-
-               <!-- Texto completo de la pista -->
-               <div class="px-3.5 pb-3 pt-0 border-t border-white/5">
-                 <p class="text-xs text-gray-300 leading-relaxed italic mt-2 whitespace-pre-line">
-                   "{{ clue.text }}"
-                 </p>
-               </div>
-             </div>
-           </div>
-         </div>
-
-         <!-- 2. PESTAÑA: SOSPECHOSOS Y FICHAS -->
-         <div v-if="activeTab === 'suspects'" class="flex flex-col gap-3 animate-scale-in">
-           <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
-             <p class="font-bold flex items-center gap-1.5 mb-1">
-               <Sparkles class="w-3.5 h-3.5" />
-               ¿Cómo colocar sospechosos?
-             </p>
-             <p class="text-gray-300">
-               Pulsa en un personaje para seleccionarlo y luego haz clic en una casilla del mapa para colocar su ficha. Clic derecho en una casilla la marca como descartada (X).
-             </p>
-           </div>
-
-           <label class="flex items-center gap-2 text-xs text-gray-400 px-1 cursor-pointer select-none">
+            <label class="flex items-center gap-2 text-xs text-gray-400 px-1 cursor-pointer select-none">
               <input v-model="showOnlyUnplaced" type="checkbox" class="accent-amber-500 w-3.5 h-3.5" />
               <span>Solo sin colocar ({{ puzzle.characters.length - placedCount }})</span>
             </label>
-            <div class="flex flex-col gap-2 max-h-[580px] overflow-y-auto pr-1">
-             <div
-               v-for="char in filteredSuspects"
-               :key="char.id"
-               @click="selectCharacter(char.id)"
-               class="glass rounded-xl p-3 border transition-all duration-200 cursor-pointer flex items-center justify-between gap-3"
-               :class="[
-                 selectedCharacterId === char.id
-                   ? 'border-amber-400 bg-amber-500/20 ring-2 ring-amber-400/30'
-                   : 'border-white/5 hover:border-white/20',
-                 playerPlacements[char.id] ? 'opacity-90' : ''
-               ]"
-             >
-               <div class="flex items-center gap-2.5 min-w-0">
-                 <div class="w-9 h-9 rounded-xl bg-dark-700 border border-white/10 flex items-center justify-center text-lg flex-none">
-                   {{ char.emoji }}
-                 </div>
-                 <div class="min-w-0">
-                   <p class="font-display font-bold text-xs text-white truncate">{{ char.name }}</p>
-                   <div class="flex items-center gap-1 mt-0.5">
-                     <span v-if="char.hat" class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">🎩 Sombrero</span>
-                     <span v-if="char.eyepatch" class="text-[9px] px-1 py-0.2 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">🏴‍☠️ Parche</span>
-                   </div>
-                 </div>
-               </div>
+            <p v-if="filteredSuspects.length === 0" class="text-center text-xs text-gray-500 py-4">Sin sospechosos para ese filtro.</p>
+            <div class="flex flex-col gap-2 max-h-145 overflow-y-auto pr-1">
+              <div
+                v-for="char in filteredSuspects"
+                :key="char.id"
+                draggable="true"
+                @dragstart="onSuspectDragStart($event, char.id)"
+                @dragend="onSuspectDragEnd"
+                @click="selectCharacter(char.id)"
+                class="glass rounded-xl p-3 border transition-all duration-200 cursor-grab active:cursor-grabbing"
+                :class="[
+                  selectedCharacterId === char.id
+                    ? 'border-amber-400 bg-amber-500/20 ring-2 ring-amber-400/30'
+                    : 'border-white/5 hover:border-white/20',
+                  draggingCharacterId === char.id ? 'opacity-50 ring-2 ring-amber-400/60' : '',
+                  playerPlacements[char.id] ? 'opacity-90' : ''
+                ]"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 rounded-xl bg-dark-700 border border-white/10 flex items-center justify-center text-lg font-emoji flex-none">
+                      {{ char.emoji }}
+                    </div>
+                    <div class="min-w-0">
+                      <p class="font-display font-bold text-xs text-white truncate">{{ char.name }}</p>
+                      <div class="flex items-center gap-1 mt-0.5">
+                        <span v-if="char.hat" class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Sombrero</span>
+                        <span v-if="char.eyepatch" class="text-[9px] px-1 py-0.2 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">Parche</span>
+                      </div>
+                    </div>
+                  </div>
 
-               <!-- Estado de colocación -->
-               <div class="flex items-center gap-2 flex-none">
-                 <span
-                   v-if="playerPlacements[char.id]"
-                   class="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
-                 >
-                   F{{ playerPlacements[char.id].row + 1 }} C{{ playerPlacements[char.id].col + 1 }}
-                 </span>
-                 <span v-else class="text-[10px] text-gray-500 italic">
-                   Sin colocar
-                 </span>
+                  <!-- Estado de colocación -->
+                  <div class="flex items-center gap-2 flex-none">
+                    <span
+                      v-if="playerPlacements[char.id]"
+                      class="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
+                    >
+                      F{{ playerPlacements[char.id].row + 1 }} C{{ playerPlacements[char.id].col + 1 }}
+                    </span>
+                    <span v-else class="text-[10px] text-gray-500 italic">
+                      Sin colocar
+                    </span>
 
-                 <button
-                   v-if="playerPlacements[char.id]"
-                   @click.stop="removeCharacterPlacement(char.id)"
-                   class="text-xs text-gray-500 hover:text-red-400 p-1 cursor-pointer"
-                   title="Quitar del tablero"
-                 >
-                   ✕
-                 </button>
-               </div>
-             </div>
-           </div>
-         </div>
+                    <button
+                      v-if="playerPlacements[char.id]"
+                      @click.stop="removeCharacterPlacement(char.id)"
+                      @dragstart.stop
+                      class="text-xs text-gray-500 hover:text-red-400 p-1 cursor-pointer"
+                      title="Quitar del tablero"
+                    >
+                      X
+                    </button>
+                  </div>
+                </div>
 
-         <!-- 3. PESTAÑA: REGLAS OFICIALES (murdoku.pdf y reglas.txt) -->
+                <!-- Pista del personaje -->
+                <div v-if="clueByCharacter.get(char.id)" class="mt-2.5 pt-2 border-t border-white/5">
+                  <p class="text-[10px] text-amber-400/90 font-medium mb-1">
+                    {{ getClueTypeLabel(clueByCharacter.get(char.id)!.type) }}
+                  </p>
+                  <p class="text-xs text-gray-300 leading-relaxed italic whitespace-pre-line">
+                    "{{ clueByCharacter.get(char.id)!.text }}"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+<!-- 2. PESTAÑA: REGLAS (reglas.txt) -->
          <div v-if="activeTab === 'legend'" class="flex flex-col gap-3 animate-scale-in text-xs text-gray-300">
            <!-- Reglas de reglas.txt -->
            <div class="glass rounded-xl p-4 border border-white/5 space-y-2">
