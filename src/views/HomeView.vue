@@ -66,11 +66,7 @@ async function startGeneration() {
   router.push({ name: 'generating' })
 }
 
-// Cargar y jugar caso oficial de mapa.png y reglas.txt
-function playOfficialContest() {
-  store.loadOfficialContest()
-  router.push({ name: 'puzzle' })
-}
+
 </script>
 
 <template>
@@ -97,8 +93,8 @@ function playOfficialContest() {
       </div>
 
       <p class="text-gray-400 text-lg max-w-xl mx-auto leading-relaxed">
-        Juega al <span class="text-amber-400 font-semibold">caso oficial de 24×24</span> o crea nuevos puzzles
-        deductivos a medida con temática, mapa y personajes procedimentales.
+        Crea puzzles deductivos a medida con temática, mapa y personajes procedimentales.
+        Coloca a cada sospechoso en su casilla y encuentra el tesoro escondido.
       </p>
     </header>
 
@@ -111,43 +107,6 @@ function playOfficialContest() {
         <span>Cómo jugar</span>
       </button>
     </div>
-
-    <!-- ===== BANNER: CASO OFICIAL MURDOKU CONTEST (mapa.png & reglas.txt) ===== -->
-    <section class="w-full max-w-5xl mb-12 animate-fade-up" style="animation-delay: 0.05s">
-      <div class="relative overflow-hidden rounded-3xl border border-amber-500/40 bg-gradient-to-r from-amber-950/80 via-dark-800 to-dark-900 p-6 lg:p-8 shadow-2xl shadow-amber-500/10">
-        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-          <div class="flex items-start gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center text-3xl shadow-lg shadow-amber-500/30 flex-none animate-pulse-gold">
-              🗺️
-            </div>
-            <div>
-              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
-                <span>⭐ Caso Insignia Oficial</span>
-                <span>•</span>
-                <span>mapa.png &amp; reglas.txt</span>
-              </div>
-              <h2 class="font-display text-xl lg:text-2xl font-black text-white">
-                Murdoku Contest #1 — El Tesoro Pirata
-              </h2>
-              <p class="text-sm text-gray-300 max-w-2xl mt-1 leading-relaxed">
-                Tablero maestro de <span class="text-amber-400 font-bold">24×24</span> con los <span class="text-amber-400 font-bold">23 sospechosos reales</span> (Augustus, Bart, Cedric...) y objetos del mapa (hamacas, camas, fogatas, árboles). ¡Resuelve las deducciones y encuentra la última casilla del Tesoro!
-              </p>
-            </div>
-          </div>
-
-          <button
-            id="btn-play-official"
-            @click="playOfficialContest"
-            class="flex-none flex items-center gap-2 px-6 py-3.5 rounded-xl font-display font-black text-sm bg-gradient-to-r from-amber-400 to-yellow-500 text-dark-900 shadow-xl shadow-amber-500/30 hover:brightness-110 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-          >
-            <span>Jugar Caso Oficial (24×24)</span>
-            <ChevronRight class="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    </section>
 
     <!-- ===== SECCIÓN: TEMÁTICA ===== -->
     <section class="w-full max-w-5xl mb-10 animate-fade-up" style="animation-delay: 0.1s">
@@ -258,7 +217,7 @@ function playOfficialContest() {
               <span class="text-[11px] font-bold text-amber-400 block mb-1">
                 ⛔ Objetos Fijos (pistas de adyacencia):
               </span>
-              <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+              <div class="flex flex-wrap gap-1.5">
                 <span
                   v-for="obj in selectedThemeData.objects.filter(o => !o.occupiable)"
                   :key="obj.id"
