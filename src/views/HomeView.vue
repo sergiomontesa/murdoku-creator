@@ -96,6 +96,11 @@ async function startGeneration() {
         Crea puzzles deductivos a medida con temática, mapa y personajes procedimentales.
         Coloca a cada sospechoso en su casilla y encuentra el tesoro escondido.
       </p>
+
+      <!-- Aviso de fines educativos -->
+      <p class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs text-gray-400 bg-white/5 border border-white/10">
+        🎓 Proyecto con fines exclusivamente educativos y de aprendizaje
+      </p>
     </header>
 
     <div class="mb-8 animate-fade-up">
@@ -422,6 +427,8 @@ async function startGeneration() {
     <!-- ===== FOOTER ===== -->
     <footer class="mt-16 text-center text-gray-600 text-xs">
       <p>Murdoku Creator — Generador de puzzles con IA</p>
+      <!-- Aviso legal: desarrollo con fines educativos -->
+      <p class="mt-1">Proyecto desarrollado solo con fines educativos y de aprendizaje.</p>
       <p class="mt-1">
         Inspirado en <a href="https://murdoku.com" target="_blank" class="text-amber-600 hover:text-amber-400 transition-colors">murdoku.com</a> de Manuel Garand
       </p>
