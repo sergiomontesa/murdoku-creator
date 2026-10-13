@@ -16,7 +16,8 @@ import {
 } from 'lucide-vue-next'
 import { usePuzzleStore } from '@/stores/puzzle'
 import { getTheme, getDifficulty } from '@/data/themes'
-import type { Zone, Character, Clue, ClueType, PlacedObject, MapObject } from '@/types/puzzle'
+import { ACCESSORY_META, getCharacterAccessories } from '@/types/puzzle'
+import type { Zone, Character, Clue, ClueType, PlacedObject, MapObject, AccessoryId } from '@/types/puzzle'
 
 const router = useRouter()
 const store = usePuzzleStore()
@@ -66,10 +67,31 @@ const filteredSuspects = computed(() => {
     if (showOnlyUnplaced.value && playerPlacements[c.id]) return false
     const clue = clueByCharacter.value.get(c.id)
     if (clueTypeFilter.value !== 'all' && clue?.type !== clueTypeFilter.value) return false
-    if (q && !(`${c.name} ${clue?.text ?? ''}`.toLowerCase().includes(q))) return false
+    // La búsqueda incluye nombre, pista y rasgos (sombrero, gafas, parche)
+    if (q) {
+      const traits = getCharacterAccessories(c).map((a) => ACCESSORY_META[a].label).join(' ')
+      if (!(`${c.name} ${clue?.text ?? ''} ${traits}`.toLowerCase().includes(q))) return false
+    }
     return true
   })
 })
+
+/** Clases de la insignia de cada rasgo */
+function accessoryBadgeClass(id: AccessoryId): string {
+  if (id === 'hat') return 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+  if (id === 'glasses') return 'bg-sky-500/20 text-sky-300 border-sky-500/30'
+  return 'bg-violet-500/20 text-violet-300 border-violet-500/30'
+}
+
+/** Emojis de los rasgos de un personaje para mostrar junto a su avatar */
+function accessoryEmojis(char: Character): string {
+  return getCharacterAccessories(char).map((a) => ACCESSORY_META[a].emoji).join(' ')
+}
+
+/** Etiqueta de rasgos para tooltips (p. ej. "Sombrero, Gafas") */
+function accessoryTitle(char: Character): string {
+  return getCharacterAccessories(char).map((a) => ACCESSORY_META[a].label).join(', ')
+}
 
 /** Mensaje de aviso/feedback cuando el usuario hace clic (ej. celda no ocupable) */
 const notificationMsg = ref<{ text: string; type: 'warning' | 'success' | 'info' } | null>(null)
@@ -926,6 +948,15 @@ function useHint() {
                          <span class="font-emoji" :style="{ fontSize: cellSize > 40 ? '20px' : '14px' }">
                            {{ getCellCharacter(row - 1, col - 1)!.emoji }}
                          </span>
+                          <!-- Rasgo del personaje (sombrero, gafas, parche) -->
+                          <span
+                            v-if="accessoryEmojis(getCellCharacter(row - 1, col - 1)!)"
+                            class="absolute -top-1 -right-1 font-emoji bg-dark-900/95 border border-white/20 rounded-full px-0.5 shadow leading-none"
+                            :style="{ fontSize: cellSize > 40 ? '11px' : '9px' }"
+                            :title="accessoryTitle(getCellCharacter(row - 1, col - 1)!)"
+                          >
+                            {{ accessoryEmojis(getCellCharacter(row - 1, col - 1)!) }}
+                          </span>
                          <span
                            v-if="cellSize > 36"
                            class="text-amber-200 font-display font-black text-[7px] leading-none mt-0.5 truncate max-w-[90%] bg-dark-900/90 px-1 py-0.5 rounded shadow"
@@ -1084,8 +1115,8 @@ function useHint() {
               <input
                 v-model="clueQuery"
                 type="text"
-                placeholder="Buscar personaje o pista..."
-                aria-label="Buscar personaje o pista"
+                placeholder="Buscar personaje, pista o rasgo..."
+                aria-label="Buscar personaje, pista o rasgo"
                 class="flex-1 min-w-0 glass rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-gray-200 placeholder:text-gray-600 outline-none focus:border-amber-500/50 transition-colors"
               />
               <select
@@ -1126,14 +1157,25 @@ function useHint() {
               >
                 <div class="flex items-center justify-between gap-3">
                   <div class="flex items-center gap-2.5 min-w-0">
-                    <div class="w-9 h-9 rounded-xl bg-dark-700 border border-white/10 flex items-center justify-center text-lg font-emoji flex-none">
+                    <div class="relative w-9 h-9 rounded-xl bg-dark-700 border border-white/10 flex items-center justify-center text-lg font-emoji flex-none">
                       {{ char.emoji }}
+                      <!-- Emoji del rasgo junto al del personaje -->
+                      <span
+                        v-if="accessoryEmojis(char)"
+                        class="absolute -bottom-1.5 -right-1.5 text-[11px] font-emoji bg-dark-900 border border-white/20 rounded-full px-0.5 shadow leading-none"
+                        :title="accessoryTitle(char)"
+                      >{{ accessoryEmojis(char) }}</span>
                     </div>
                     <div class="min-w-0">
                       <p class="font-display font-bold text-xs text-white truncate">{{ char.name }}</p>
-                      <div class="flex items-center gap-1 mt-0.5">
-                        <span v-if="char.hat" class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Sombrero</span>
-                        <span v-if="char.eyepatch" class="text-[9px] px-1 py-0.2 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">Parche</span>
+                      <div v-if="getCharacterAccessories(char).length > 0" class="flex items-center gap-1 mt-0.5 flex-wrap">
+                        <span
+                          v-for="acc in getCharacterAccessories(char)"
+                          :key="acc"
+                          class="text-[9px] px-1 py-0.2 rounded border inline-flex items-center gap-0.5"
+                          :class="accessoryBadgeClass(acc)"
+                          :title="ACCESSORY_META[acc].selfSentence"
+                        >{{ ACCESSORY_META[acc].emoji }} {{ ACCESSORY_META[acc].label }}</span>
                       </div>
                     </div>
                   </div>

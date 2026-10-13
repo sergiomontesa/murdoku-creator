@@ -399,7 +399,7 @@ async function startGeneration() {
             </li>
             <li class="flex gap-2.5">
               <span class="flex-none w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black flex items-center justify-center">2</span>
-              <p><strong class="text-white">Lee los testimonios.</strong> Cada pista describe dónde estaba alguien: junto a un objeto, en una zona o al este/oeste de otro.</p>
+              <p><strong class="text-white">Lee los testimonios.</strong> Cada pista describe dónde estaba alguien: junto a un objeto, en una zona o al este/oeste de otro. Algunos llevan 🎩 👓 👁️ y las pistas los mencionan («al este de Marta, que llevaba gafas»).</p>
             </li>
             <li class="flex gap-2.5">
               <span class="flex-none w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black flex items-center justify-center">3</span>

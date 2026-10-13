@@ -6,9 +6,10 @@
 import { ref } from 'vue'
 import type {
   GeneratedPuzzle, Zone, Character, Clue, PlacedObject,
-  ThemeId, DifficultyId, ZoneType, MapObject
+  ThemeId, DifficultyId, ZoneType, MapObject, AccessoryId
 } from '@/types/puzzle'
 import { getTheme, getDifficulty } from '@/data/themes'
+import { ACCESSORY_META, getCharacterAccessories } from '@/types/puzzle'
 
 // ============================================================
 // UTILIDADES DE ALEATORIEDAD
@@ -234,6 +235,18 @@ function generateCharacters(
     }
   }
 
+  // Reparto de rasgos visuales (sombrero, gafas, parche): como máximo uno
+  // por personaje y solo en una parte de ellos (~45%), para que los rasgos
+  // sirvan como seña de identidad en las pistas sin saturar el tablero.
+  // Se garantiza al menos un personaje con rasgo y al menos uno sin rasgo.
+  const numWithAccessory = Math.max(1, Math.min(numChars - 1, Math.round(numChars * 0.45)))
+  const shuffledPositions = shuffle([...Array(numChars).keys()])
+  const accessoryCycle = shuffle<AccessoryId>(['hat', 'glasses', 'eyepatch'])
+  const accessoryByIndex = new Map<number, AccessoryId>()
+  shuffledPositions.slice(0, numWithAccessory).forEach((charPos, k) => {
+    accessoryByIndex.set(charPos, accessoryCycle[k % accessoryCycle.length])
+  })
+
   let attempts = 0
   let charIdx = 0
 
@@ -252,6 +265,9 @@ function generateCharacters(
     usedRows.add(row)
     usedCols.add(col)
 
+    // Rasgo asignado a este personaje (como máximo uno)
+    const accessory = accessoryByIndex.get(charIdx)
+
     characters.push({
       id: `char-${charIdx}`,
       name: characterMeta[charIdx].name,
@@ -259,8 +275,9 @@ function generateCharacters(
       row,
       col,
       zoneId: zone.id,
-      hat: Math.random() < 0.35,
-      eyepatch: Math.random() < 0.2,
+      hat: accessory === 'hat',
+      glasses: accessory === 'glasses',
+      eyepatch: accessory === 'eyepatch',
     })
     charIdx++
   }
@@ -290,6 +307,10 @@ function generateClues(
   for (let i = 0; i < characters.length; i++) {
     const char = characters[i]
     const zone = zoneMap.get(char.zoneId)
+    // Otros personajes que llevan algún rasgo (candidatos para referencias)
+    const othersWithAccessory = characters.filter(
+      c => c.id !== char.id && getCharacterAccessories(c).length > 0
+    )
 
     // 1. ¿Está el personaje sobre un objeto ocupable (cama, silla, hamaca)?
     const objOnCell = placedObjects.find(p => p.row === char.row && p.col === char.col)
@@ -322,11 +343,50 @@ function generateClues(
 
     // Si aún no hay pista o queremos variar con pistas de zona/relativas:
     if (!clueText) {
-      const mode = rPick(['zone_top', 'cardinal', 'relative', 'zone'] as const)
+      const mode = rPick(['zone_top', 'cardinal', 'relative', 'accessory_zone', 'accessory_relative', 'zone'] as const)
 
       if (mode === 'zone_top' && zone && zone.topRow !== undefined && char.row === zone.topRow) {
         clueText = `Estaba en la fila superior de su zona (${zone.name}).`
         clueType = 'row'
+      } else if (mode === 'accessory_zone' && othersWithAccessory.length > 0) {
+        // Referencia por rasgo en la misma zona: "Estaba en la misma zona
+        // que Marta, que llevaba sombrero." (verificado: misma zoneId)
+        const sameZone = othersWithAccessory.filter(o => o.zoneId === char.zoneId)
+        if (sameZone.length > 0) {
+          const other = rPick(sameZone)
+          const otherAcc = getCharacterAccessories(other)[0]
+          clueText = `Estaba en la misma zona que ${other.name}, que llevaba ${ACCESSORY_META[otherAcc].wornPhrase}.`
+          clueType = 'relative'
+        } else {
+          clueText = `Se encontraba en ${zone?.name ?? 'un barco'}.`
+          clueType = 'zone'
+        }
+      } else if (mode === 'accessory_relative' && othersWithAccessory.length > 0) {
+        // Referencia por rasgo este/oeste: "Estaba al este de Pedro, que
+        // llevaba un parche en el ojo." (verificado: columna menor)
+        const eastOf = othersWithAccessory.filter(o => o.col < char.col)
+        const westOf = othersWithAccessory.filter(o => o.col > char.col)
+        const describe = (other: Character) => {
+          const otherAcc = getCharacterAccessories(other)[0]
+          return `que llevaba ${ACCESSORY_META[otherAcc].wornPhrase}`
+        }
+        if (eastOf.length > 0 && westOf.length > 0 && Math.random() < 0.5) {
+          const e = rPick(eastOf)
+          const w = rPick(westOf)
+          clueText = `Estaba al este de ${e.name}, ${describe(e)} y al oeste de ${w.name}, ${describe(w)}.`
+          clueType = 'relative'
+        } else if (eastOf.length > 0) {
+          const e = rPick(eastOf)
+          clueText = `Estaba al este de ${e.name}, ${describe(e)}.`
+          clueType = 'relative'
+        } else if (westOf.length > 0) {
+          const w = rPick(westOf)
+          clueText = `Estaba al oeste de ${w.name}, ${describe(w)}.`
+          clueType = 'relative'
+        } else {
+          clueText = `Se encontraba en ${zone?.name ?? 'un barco'}.`
+          clueType = 'zone'
+        }
       } else if (mode === 'relative' && characters.length > 2) {
         const others = characters.filter(c => c.id !== char.id)
         const westOf = others.find(o => o.col > char.col)
@@ -351,7 +411,14 @@ function generateClues(
       }
     }
 
-    // Añadir regla secundaria de columna/accesorio en pistas complejas
+    // Seña de identidad: si el personaje lleva un rasgo, mencionarlo junto
+    // a la pista de localización ("... Llevaba sombrero.")
+    const ownAccessory = getCharacterAccessories(char)[0]
+    if (ownAccessory && Math.random() < 0.45) {
+      clueText += ` ${ACCESSORY_META[ownAccessory].selfSentence}`
+    }
+
+    // Añadir regla secundaria de columna/rasgo en pistas complejas
     if (Math.random() < 0.35) {
       const nonOccThemeObjs = theme.objects.filter((o: MapObject) => !o.occupiable)
       const objectsInCol = placedObjects.filter(p => p.col === char.col)
@@ -361,8 +428,31 @@ function generateClues(
       if (sampleObj && !hasSampleObj && Math.random() < 0.5) {
         const art = /^[aeiou]/i.test(sampleObj.name) ? 'ninguna' : 'ningún'
         clueText += ` No había ${art} ${sampleObj.name.toLowerCase()} en toda su columna.`
-      } else if (!char.hat) {
-        clueText += ` Nadie en una columna adyacente llevaba sombrero.`
+      } else {
+        // Negaciones de rasgos verificadas contra la solución: solo se afirma
+        // la ausencia de un rasgo que el propio personaje no lleva y que nadie
+        // en esa fila, columna o columnas adyacentes lleva.
+        const ownAcc = new Set(getCharacterAccessories(char))
+        const negatives: string[] = []
+        for (const acc of ['hat', 'glasses', 'eyepatch'] as AccessoryId[]) {
+          if (ownAcc.has(acc)) continue
+          const phrase = ACCESSORY_META[acc].negativePhrase
+          const inRow = characters.some(
+            o => getCharacterAccessories(o).includes(acc) && o.row === char.row
+          )
+          if (!inRow) negatives.push(`Nadie en su fila llevaba ${phrase}.`)
+          const inCol = characters.some(
+            o => getCharacterAccessories(o).includes(acc) && o.col === char.col
+          )
+          if (!inCol) negatives.push(`Nadie en su columna llevaba ${phrase}.`)
+          const inAdjCol = characters.some(
+            o => getCharacterAccessories(o).includes(acc) && Math.abs(o.col - char.col) === 1
+          )
+          if (!inAdjCol) negatives.push(`Nadie en una columna adyacente llevaba ${phrase}.`)
+        }
+        if (negatives.length > 0) {
+          clueText += ` ${rPick(negatives)}`
+        }
       }
     }
 

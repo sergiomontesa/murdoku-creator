@@ -36,8 +36,75 @@ export interface Character {
   row: number    // 0-indexed
   col: number    // 0-indexed
   zoneId: string
-  hat: boolean   // Para la restricción de sombrero de Hyacinth
-  eyepatch: boolean  // Para restricciones de parche
+  hat: boolean       // Lleva sombrero
+  glasses: boolean   // Lleva gafas
+  eyepatch: boolean  // Lleva un parche en el ojo
+}
+
+/** Rasgos visuales opcionales de los personajes */
+export type AccessoryId = 'hat' | 'glasses' | 'eyepatch'
+
+/** Metadatos de presentación de cada rasgo */
+export interface AccessoryMeta {
+  id: AccessoryId
+  /** Emoji que se muestra junto al del personaje */
+  emoji: string
+  /** Etiqueta corta para insignias y buscador */
+  label: string
+  /** Frase autónoma: "Llevaba sombrero." */
+  selfSentence: string
+  /** Complemento para "que llevaba ...": "sombrero" / "gafas" / "un parche en el ojo" */
+  wornPhrase: string
+  /** Complemento negativo para "nadie llevaba ...": "sombrero" / "gafas" / "parche en el ojo" */
+  negativePhrase: string
+}
+
+/** Catálogo de rasgos con sus textos (formulación neutra, sin género) */
+export const ACCESSORY_META: Record<AccessoryId, AccessoryMeta> = {
+  hat: {
+    id: 'hat',
+    emoji: '🎩',
+    label: 'Sombrero',
+    selfSentence: 'Llevaba sombrero.',
+    wornPhrase: 'sombrero',
+    negativePhrase: 'sombrero',
+  },
+  glasses: {
+    id: 'glasses',
+    emoji: '👓',
+    label: 'Gafas',
+    selfSentence: 'Llevaba gafas.',
+    wornPhrase: 'gafas',
+    negativePhrase: 'gafas',
+  },
+  eyepatch: {
+    id: 'eyepatch',
+    emoji: '👁️',
+    label: 'Parche',
+    selfSentence: 'Llevaba un parche en el ojo.',
+    wornPhrase: 'un parche en el ojo',
+    negativePhrase: 'parche en el ojo',
+  },
+}
+
+/** Lista ordenada de rasgos para iterar en la interfaz */
+export const ACCESSORY_LIST: AccessoryMeta[] = [
+  ACCESSORY_META.hat,
+  ACCESSORY_META.glasses,
+  ACCESSORY_META.eyepatch,
+]
+
+/** Rasgos de un personaje como lista (vacía si no lleva ninguno) */
+export function getCharacterAccessories(c: {
+  hat: boolean
+  glasses: boolean
+  eyepatch: boolean
+}): AccessoryId[] {
+  const list: AccessoryId[] = []
+  if (c.hat) list.push('hat')
+  if (c.glasses) list.push('glasses')
+  if (c.eyepatch) list.push('eyepatch')
+  return list
 }
 
 /** Tipos de pistas disponibles */

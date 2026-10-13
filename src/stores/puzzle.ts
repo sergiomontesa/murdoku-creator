@@ -73,12 +73,31 @@ export const usePuzzleStore = defineStore('puzzle', () => {
         const state = JSON.parse(stateJson)
         if (state.selectedTheme) selectedTheme.value = state.selectedTheme
         if (state.selectedDifficulty) selectedDifficulty.value = state.selectedDifficulty
-        if (state.currentPuzzle) currentPuzzle.value = state.currentPuzzle
-        if (state.puzzleHistory) puzzleHistory.value = state.puzzleHistory
+        if (state.currentPuzzle) currentPuzzle.value = normalizePuzzle(state.currentPuzzle)
+        if (state.puzzleHistory) {
+          state.puzzleHistory = state.puzzleHistory.map(normalizePuzzle)
+          puzzleHistory.value = state.puzzleHistory
+        }
         if (state.hintsUsed !== undefined) hintsUsed.value = state.hintsUsed
       }
     } catch (e) {
       console.error('Error loading state from localStorage:', e)
+    }
+  }
+
+  /**
+   * Normaliza un puzzle guardado para compatibilizar partidas anteriores
+   * con el modelo actual de rasgos (los puzzles viejos no tienen `glasses`).
+   */
+  function normalizePuzzle(puzzle: GeneratedPuzzle): GeneratedPuzzle {
+    return {
+      ...puzzle,
+      characters: (puzzle.characters ?? []).map((c) => ({
+        ...c,
+        hat: !!c.hat,
+        glasses: !!c.glasses,
+        eyepatch: !!c.eyepatch,
+      })),
     }
   }
 
