@@ -2,7 +2,7 @@
 /**
  * Vista interactiva del mapa Murdoku.
  * El mapa presenta la riqueza geográfica de las zonas y los objetos distribuidos
- * (distiñendo entre ocupables y no ocupables) siguiendo las reglas del juego (reglas.txt).
+ * (distiñendo entre ocupables y no ocupables) siguiendo las reglas generales del juego.
  * El jugador puede deducir y colocar las fichas de los personajes o revelar la solución.
  */
 import { computed, ref, reactive, watch, onMounted, onUnmounted } from 'vue'
@@ -924,7 +924,7 @@ function useHint() {
                      >
                        <!-- 1. OBJETO EN LA CASILLA (SI EXISTE) -->
                        <template v-if="getCellObject(row - 1, col - 1)">
-                         <!-- Objeto OCUPABLE (cama, silla, hamaca) según reglas.txt -->
+                         <!-- Objeto OCUPABLE (cama, silla, hamaca) según las reglas generales -->
                          <div
                            v-if="getCellObject(row - 1, col - 1)!.info.occupiable"
                            class="seat-spot w-full h-full rounded-md flex flex-col items-center justify-center backdrop-blur-[2px] transition-transform group-hover:scale-105 shadow-sm"
@@ -941,7 +941,7 @@ function useHint() {
                            </span>
                          </div>
 
-                         <!-- Objeto FIJO / NO OCUPABLE (árbol, roca, fogata, lápida...) según reglas.txt -->
+                         <!-- Objeto FIJO / NO OCUPABLE (árbol, roca, fogata, lápida...) según las reglas generales -->
                          <div
                            v-else
                            class="obstacle-spot w-full h-full rounded-md flex flex-col items-center justify-center border border-white/10 bg-black/40 backdrop-blur-[1px] shadow-inner"
@@ -1095,7 +1095,7 @@ function useHint() {
                <div class="flex-1">
                  <div class="flex items-center gap-2">
                    <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">Coordenadas del Tesoro</span>
-                   <span class="text-xs text-gray-500">• El cruce de la última fila y columna libres (reglas.txt)</span>
+                   <span class="text-xs text-gray-500">• El cruce de la última fila y columna libres (regla general)</span>
                  </div>
                  <p class="font-mono text-xl font-black text-white mt-0.5">
                    Fila {{ puzzle.treasureRow }} · Columna {{ puzzle.treasureCol }}
@@ -1253,21 +1253,55 @@ function useHint() {
             </div>
           </div>
 
-<!-- 2. PESTAÑA: REGLAS (reglas.txt) -->
+<!-- 2. PESTAÑA: REGLAS GENERALES -->
          <div v-if="activeTab === 'legend'" class="flex flex-col gap-3 animate-scale-in text-xs text-gray-300">
-           <!-- Reglas de reglas.txt -->
+            <!-- Reglas generales del juego -->
+            <div class="glass rounded-xl p-4 border border-white/5 space-y-2">
+              <h3 class="font-display font-bold text-white text-sm flex items-center gap-1.5">
+                <HelpCircle class="w-4 h-4 text-amber-400" />
+                Reglas generales
+              </h3>
+              <ul class="space-y-1.5 text-gray-300 list-disc list-inside">
+                <li>Aquí no hay asesino: coloca a cada sospechoso en su casilla y encuentra las coordenadas del <strong>Tesoro</strong>.</li>
+                <li>Solo puede haber <strong>un sospechoso por fila y por columna</strong>. Si dos fichas comparten fila o columna verás un aviso rojo.</li>
+                <li>Las casillas <strong>verdes se pueden ocupar</strong> (camas, sillas, hamacas…); las <strong>grises son objetos fijos</strong> que no se pueden ocupar y solo sirven de referencia.</li>
+                <li>El Tesoro está en el <strong>cruce de la última fila y la última columna libres</strong> (las que quedan sin ningún sospechoso). Puede estar enterrado bajo un objeto fijo.</li>
+              </ul>
+            </div>
+
+            <!-- Cómo leer las pistas -->
+            <div class="glass rounded-xl p-4 border border-white/5 space-y-2">
+              <h3 class="font-display font-bold text-white text-sm">Cómo leer las pistas</h3>
+              <ul class="space-y-1.5 text-gray-300 list-disc list-inside">
+                <li><strong>«Estaba en una cama / en una hamaca / en un …»</strong>: está en la misma casilla que ese objeto ocupable.</li>
+                <li><strong>«Estaba junto a …»</strong>: está en una casilla adyacente en cruz (arriba, abajo, izquierda o derecha), nunca en diagonal.</li>
+                <li><strong>«Al este de …»</strong>: está en una columna con número mayor; <strong>«al oeste de …»</strong>: en una columna con número menor. No implica estar en la misma fila.</li>
+                <li><strong>«En la misma zona que …»</strong>: ambos sospechosos están dentro de la misma zona del mapa.</li>
+                <li><strong>«En la fila superior de su zona»</strong>: está en la fila de más arriba de esa zona.</li>
+                <li><strong>«No había … en toda su columna»</strong>: ese objeto no aparece en ninguna casilla de su columna.</li>
+                <li><strong>«Nadie en su fila / columna llevaba …»</strong>: ningún sospechoso de esa fila o columna lleva ese rasgo (🎩 👓 👁️).</li>
+              </ul>
+            </div>
+
+           <!-- Rasgos de los sospechosos (sombrero, gafas, parche) -->
            <div class="glass rounded-xl p-4 border border-white/5 space-y-2">
-             <h3 class="font-display font-bold text-white text-sm flex items-center gap-1.5">
-               <HelpCircle class="w-4 h-4 text-amber-400" />
-               Reglas Especiales (reglas.txt)
-             </h3>
-             <ul class="space-y-1.5 text-gray-300 list-disc list-inside">
-               <li>Esta vez no hay asesino, encuentra las coordenadas del <strong>Tesoro</strong> para resolver este caso. El Tesoro está en la última casilla de todas.</li>
-               <li>Las <strong>Balandras</strong>, las <strong>Fragatas</strong> y el <strong>Galeón</strong> cuentan como barcos, y cada uno cuenta como su propia zona.</li>
-               <li>La <strong>cama, silla y hamaca</strong> se pueden ocupar.</li>
-               <li>La <strong>fogata, árbol, flores, tiburón, saco, cerdo, lápida, caja, cuerda, barril, estantería, arbusto, mesa y roca</strong> no se pueden ocupar.</li>
-               <li>El Tesoro puede estar enterrado bajo un objeto que normalmente no se puede ocupar.</li>
-             </ul>
+             <h3 class="font-display font-bold text-white text-sm">Rasgos de los sospechosos</h3>
+             <p class="text-gray-400">
+               Algunos sospechosos llevan un rasgo visible junto a su emoji. Las pistas lo usan como seña de
+               identidad: «Llevaba sombrero», «al este de Marta, que llevaba gafas» o «nadie en su fila llevaba parche en el ojo».
+               Puedes buscar por rasgo en el panel de sospechosos.
+             </p>
+             <div class="flex flex-wrap gap-1.5">
+               <span
+                 v-for="meta in [ACCESSORY_META.hat, ACCESSORY_META.glasses, ACCESSORY_META.eyepatch]"
+                 :key="meta.id"
+                 class="px-2 py-1 rounded border text-xs inline-flex items-center gap-1"
+                 :class="accessoryBadgeClass(meta.id)"
+                 :title="meta.selfSentence"
+               >
+                 {{ meta.emoji }} {{ meta.label }}
+               </span>
+             </div>
            </div>
 
            <!-- Clasificación de objetos -->
