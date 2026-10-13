@@ -264,7 +264,7 @@ function selectCharacter(id: string) {
   }
 }
 
-/** Ficha arrastrada desde el panel (drag & drop) */
+/** Ficha arrastrada (desde el panel o desde una casilla del tablero) */
 const draggingCharacterId = ref<string | null>(null)
 
 /** Celda resaltada como destino durante el arrastre */
@@ -282,6 +282,15 @@ function placeCharacter(charId: string, row: number, col: number): boolean {
   if (cellObj && !cellObj.info.occupiable) {
     notify(`No se puede ocupar: hay ${cellObj.info.name} (${cellObj.info.emoji}), que es un objeto fijo no ocupable.`, 'warning')
     return false
+  }
+
+  // Evitar apilar dos fichas en la misma casilla
+  for (const [otherId, pos] of Object.entries(playerPlacements)) {
+    if (otherId !== charId && pos.row === row && pos.col === col) {
+      const other = puzzle.value.characters.find(c => c.id === otherId)
+      notify(`Casilla ocupada por ${other?.name ?? 'otro sospechoso'}. Mueve esa ficha primero para liberar la casilla.`, 'warning')
+      return false
+    }
   }
 
   moves.value++
@@ -306,6 +315,26 @@ function onSuspectDragStart(e: DragEvent, charId: string) {
   }
 }
 
+/** Inicio del arrastre de una ficha ya colocada para moverla a otra casilla */
+function onTokenDragStart(e: DragEvent, charId: string) {
+  if (showSolution.value || !playerPlacements[charId]) {
+    e.preventDefault()
+    return
+  }
+  draggingCharacterId.value = charId
+  selectedCharacterId.value = charId
+  if (e.dataTransfer) {
+    e.dataTransfer.setData('text/plain', charId)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+}
+
+/** Indica si una celda contiene una ficha del jugador que se puede arrastrar */
+function isPlayerToken(row: number, col: number): boolean {
+  if (showSolution.value) return false
+  return Object.values(playerPlacements).some(pos => pos.row === row && pos.col === col)
+}
+
 /** Fin del arrastre (se coloque o no) */
 function onSuspectDragEnd() {
   draggingCharacterId.value = null
@@ -320,12 +349,15 @@ function onCellDragOver(e: DragEvent, row: number, col: number) {
   if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
 }
 
-/** Soltado de la ficha sobre una celda del mapa */
+/** Soltado de la ficha sobre una celda del mapa (colocar o mover) */
 function onCellDrop(row: number, col: number) {
   const charId = draggingCharacterId.value
   draggingCharacterId.value = null
   dropCell.value = null
   if (!charId || showSolution.value) return
+  // Soltar sobre su propia casilla: no hacer nada
+  const current = playerPlacements[charId]
+  if (current && current.row === row && current.col === col) return
   placeCharacter(charId, row, col)
 }
 
@@ -943,7 +975,11 @@ function useHint() {
                        <div
                          v-if="getCellCharacter(row - 1, col - 1)"
                          class="token-disc absolute inset-0.5 flex flex-col items-center justify-center z-20 rounded-full animate-scale-in"
+                         :class="{ 'cursor-grab active:cursor-grabbing': isPlayerToken(row - 1, col - 1) }"
+                         :draggable="isPlayerToken(row - 1, col - 1)"
                          :title="`Sospechoso: ${getCellCharacter(row - 1, col - 1)!.name}`"
+                         @dragstart="onTokenDragStart($event, getCellCharacter(row - 1, col - 1)!.id)"
+                         @dragend="onSuspectDragEnd"
                        >
                          <span class="font-emoji" :style="{ fontSize: cellSize > 40 ? '20px' : '14px' }">
                            {{ getCellCharacter(row - 1, col - 1)!.emoji }}
