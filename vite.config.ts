@@ -16,6 +16,8 @@ export default defineConfig({
   },
   server: {
     port: 8888,
+    // Si el 8888 está ocupado, probar con el siguiente libre en vez de fallar
+    strictPort: false,
     host: true,
   }
 })
