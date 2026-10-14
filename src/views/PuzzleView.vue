@@ -453,12 +453,28 @@ const totalCandidates = computed(() =>
   Object.values(candidateMarks).reduce((n, cells) => n + cells.length, 0),
 )
 
+/** Selecciona al personaje y activa el lápiz para marcar sus candidatas.
+ * Si ya estaba armado, suelta el lápiz y deselecciona. */
+function armCandidates(charId: string) {
+  if (showSolution.value) return
+  if (candidateMode.value && selectedCharacterId.value === charId) {
+    candidateMode.value = false
+    selectedCharacterId.value = null
+    notify('Lápiz soltado.', 'info')
+    return
+  }
+  selectedCharacterId.value = charId
+  candidateMode.value = true
+  const char = puzzle.value.characters.find(c => c.id === charId)
+  notify(`Lápiz sobre ${char?.name ?? 'sospechoso'}: pulsa casillas para marcarlas como posibles (otra pulsación quita la marca).`, 'info')
+}
+
 /** Activa o desactiva el modo candidatas */
 function toggleCandidateMode() {
   if (showSolution.value) return
   candidateMode.value = !candidateMode.value
   notify(candidateMode.value
-    ? 'Modo candidatas: pulsa casillas para marcarlas como posibles del seleccionado (otra pulsación la quita). Arrastrar sigue colocando.'
+    ? 'Lápiz activado: 1) pulsa un personaje (o su lápiz en la tarjeta), 2) pulsa casillas para marcarlas como posibles.'
     : 'Modo candidatas desactivado.', 'info')
 }
 
@@ -524,7 +540,9 @@ function selectCharacter(id: string) {
     selectedCharacterId.value = id
     const char = puzzle.value.characters.find(c => c.id === id)
     if (char) {
-      notify(`Seleccionado: ${char.name}. Haz clic en una casilla para colocarlo.`, 'info')
+      notify(candidateMode.value
+      ? `Lápiz sobre ${char.name}: pulsa casillas para marcarlas como posibles.`
+      : `Seleccionado: ${char.name}. Haz clic en una casilla para colocarlo.`, 'info')
     }
   }
 }
@@ -717,7 +735,7 @@ function handleCellClick(row: number, col: number) {
   const candText = ((candidatesByCell.value.get(`${row},${col}`) ?? [])
     .map(id => puzzle.value.characters.find(c => c.id === id)?.name)
     .filter((n): n is string => !!n).join(', '))
-  const candSuffix = candText ? ` Candidatas: ${candText}.` : ''
+  const candSuffix = (candText ? ` Candidatas: ${candText}.` : '') + (candidateMode.value && !selectedCharacterId.value ? ' Selecciona un personaje (o su lápiz) para marcar sus candidatas.' : '')
   if (cellObj) {
     if (cellObj.info.occupiable) {
       notify(`Casilla F${row + 1} C${col + 1} (${zone?.name ?? 'Zona'}): contiene ${cellObj.info.name} (¡se puede ocupar!).${candSuffix}`, 'info')
@@ -1253,7 +1271,7 @@ const murderer = computed(() =>
                  :class="candidateMode
                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
                    : 'bg-white/5 text-gray-300 border-white/5 hover:bg-white/10'"
-                 title="Modo candidatas (C): los clics marcan casillas posibles en vez de colocar"
+                 title="Lápiz de candidatas (C): primero elige personaje (o su lápiz), luego pulsa casillas; otra pulsación quita la marca"
                >
                  <Pencil class="w-3.5 h-3.5" />
                  <span>Candidatas ({{ totalCandidates }})</span>
@@ -1423,7 +1441,7 @@ const murderer = computed(() =>
                        <!-- 1b. MARCAS CANDIDATAS (LÁPIZ) -->
                        <div
                          v-if="!showSolution && (candidatesByCell.get(`${row - 1},${col - 1}`) ?? []).length > 0"
-                         class="pointer-events-none absolute inset-0 z-[5] flex flex-wrap content-start items-start justify-start gap-px overflow-hidden p-[3px]"
+                         class="pointer-events-none absolute inset-0 z-[15] flex flex-wrap content-start items-start justify-start gap-px overflow-hidden p-[3px]"
                        >
                          <span
                            v-for="cid in (candidatesByCell.get(`${row - 1},${col - 1}`) ?? []).slice(0, 4)"
@@ -1681,7 +1699,7 @@ const murderer = computed(() =>
                 ¿Cómo colocar sospechosos?
               </p>
               <p class="text-gray-300">
-                Arrastra un personaje hasta una casilla del mapa, o púlsalo para seleccionarlo y haz clic en una casilla. Para retirar una ficha, arrástrala fuera del tablero (pulsar sobre ella ya no la quita). Clic derecho en una casilla libre la marca como descartada (X). Tienes Deshacer (o Ctrl+Z) para recuperar el último movimiento. Activa ✏️ Candidatas (o pulsa C) para marcar varias casillas posibles del seleccionado; pulsa una de sus marcas o su chip F·C en la tarjeta para fijarla allí.
+                Arrastra un personaje hasta una casilla del mapa, o púlsalo para seleccionarlo y haz clic en una casilla. Para retirar una ficha, arrástrala fuera del tablero (pulsar sobre ella ya no la quita). Clic derecho en una casilla libre la marca como descartada (X). Tienes Deshacer (o Ctrl+Z) para recuperar el último movimiento. ¿Dudas entre varias casillas? 1) Pulsa el lápiz en la tarjeta del sospechoso (lo selecciona y activa el lápiz). 2) Pulsa las casillas posibles para marcarlas; otra pulsación quita la marca. 3) Para fijarlo, pulsa su chip F·C en la tarjeta o la casilla marcada con él seleccionado.
               </p>
             </div>
 
@@ -1764,6 +1782,18 @@ const murderer = computed(() =>
 
                   <!-- Estado de colocación -->
                   <div class="flex items-center gap-2 flex-none">
+                    <button
+                      v-if="!showSolution"
+                      @click.stop="armCandidates(char.id)"
+                      @dragstart.stop
+                      class="p-1 rounded transition-colors cursor-pointer border"
+                      :class="(candidateMode && selectedCharacterId === char.id)
+                        ? 'bg-amber-500/25 text-amber-300 border-amber-500/40'
+                        : 'text-gray-500 border-transparent hover:text-amber-300 hover:border-amber-500/30'"
+                      :title="(candidateMode && selectedCharacterId === char.id) ? 'Soltar el lápiz' : 'Marcar candidatas de ' + char.name + ': lo selecciona y activa el lápiz'"
+                    >
+                      <Pencil class="w-3.5 h-3.5" />
+                    </button>
                     <span
                       v-if="playerPlacements[char.id]"
                       class="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
