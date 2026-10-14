@@ -1,2 +1,4 @@
 overrides:
   vite: npm:@voidzero-dev/vite-plus-core@1.1.0
+allowBuilds:
+  vue-demi: true
