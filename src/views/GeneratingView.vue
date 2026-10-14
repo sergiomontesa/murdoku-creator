@@ -8,12 +8,14 @@ import { useRouter } from 'vue-router'
 import { Sparkles } from 'lucide-vue-next'
 import { usePuzzleStore } from '@/stores/puzzle'
 import { getTheme, getDifficulty } from '@/data/themes'
+import { GAME_MODES } from '@/types/puzzle'
 
 const router = useRouter()
 const store = usePuzzleStore()
 
 const theme = getTheme(store.selectedTheme)
 const difficulty = getDifficulty(store.selectedDifficulty)
+const modeInfo = GAME_MODES[store.selectedMode] ?? GAME_MODES.treasure
 
 // Pasos de generación para mostrar en la UI
 const steps = [
@@ -69,6 +71,7 @@ onMounted(async () => {
         Creando tu puzzle
       </h1>
       <p class="text-gray-400 mb-1">
+        <span class="text-amber-400">{{ modeInfo.emoji }} {{ modeInfo.name }}</span> ·
         <span class="text-amber-400">{{ theme.name }}</span> ·
         <span class="text-gray-300">{{ difficulty.name }}</span> ·
         <span class="font-mono text-sm">{{ difficulty.gridSize }}×{{ difficulty.gridSize }}</span>

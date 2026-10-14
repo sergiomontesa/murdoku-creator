@@ -4,7 +4,7 @@
  */
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import type { GeneratedPuzzle, ThemeId, DifficultyId, Character, Clue } from '@/types/puzzle'
+import type { GeneratedPuzzle, ThemeId, DifficultyId, Character, Clue, GameMode } from '@/types/puzzle'
 import { usePuzzleGenerator } from '@/composables/usePuzzleGenerator'
 import { getOfficialContestPuzzle } from '@/data/officialContest'
 
@@ -18,6 +18,9 @@ export const usePuzzleStore = defineStore('puzzle', () => {
 
   /** Dificultad seleccionada por el usuario */
   const selectedDifficulty = ref<DifficultyId>('easy')
+
+  /** Modo de juego seleccionado por el usuario */
+  const selectedMode = ref<GameMode>('treasure')
 
   /** Puzzle generado actualmente (null si no hay ninguno) */
   const currentPuzzle = ref<GeneratedPuzzle | null>(null)
@@ -55,6 +58,7 @@ export const usePuzzleStore = defineStore('puzzle', () => {
       const state = {
         selectedTheme: selectedTheme.value,
         selectedDifficulty: selectedDifficulty.value,
+        selectedMode: selectedMode.value,
         currentPuzzle: currentPuzzle.value,
         puzzleHistory: puzzleHistory.value,
         hintsUsed: hintsUsed.value,
@@ -73,6 +77,9 @@ export const usePuzzleStore = defineStore('puzzle', () => {
         const state = JSON.parse(stateJson)
         if (state.selectedTheme) selectedTheme.value = state.selectedTheme
         if (state.selectedDifficulty) selectedDifficulty.value = state.selectedDifficulty
+        if (state.selectedMode === 'treasure' || state.selectedMode === 'murder') {
+          selectedMode.value = state.selectedMode
+        }
         if (state.currentPuzzle) currentPuzzle.value = normalizePuzzle(state.currentPuzzle)
         if (state.puzzleHistory) {
           state.puzzleHistory = state.puzzleHistory.map(normalizePuzzle)
@@ -87,18 +94,64 @@ export const usePuzzleStore = defineStore('puzzle', () => {
 
   /**
    * Normaliza un puzzle guardado para compatibilizar partidas anteriores
-   * con el modelo actual de rasgos (los puzzles viejos no tienen `glasses`).
+   * con el modelo actual de rasgos (los puzzles viejos no tienen `glasses`)
+   * y con el nuevo campo `mode` (los viejos son de búsqueda del tesoro).
+   * Además sanea pistas antiguas incoherentes con la regla de 1 por fila y
+   * por columna ("Nadie en su fila/columna llevaba ...") y repara direcciones
+   * norte/sur generadas con el sentido invertido.
    */
   function normalizePuzzle(puzzle: GeneratedPuzzle): GeneratedPuzzle {
+    const characters = (puzzle.characters ?? []).map((c) => ({
+      ...c,
+      hat: !!c.hat,
+      glasses: !!c.glasses,
+      eyepatch: !!c.eyepatch,
+      scarf: !!c.scarf,
+      cane: !!c.cane,
+      ring: !!c.ring,
+      medal: !!c.medal,
+      isVictim: !!c.isVictim || c.id === puzzle.victimId,
+    }))
     return {
       ...puzzle,
-      characters: (puzzle.characters ?? []).map((c) => ({
-        ...c,
-        hat: !!c.hat,
-        glasses: !!c.glasses,
-        eyepatch: !!c.eyepatch,
+      mode: puzzle.mode === 'murder' ? 'murder' : 'treasure',
+      victimId: puzzle.victimId ?? null,
+      murdererId: puzzle.murdererId ?? null,
+      characters,
+      clues: (puzzle.clues ?? []).map((clue) => ({
+        ...clue,
+        text: repairClueText(clue.text, clue.characterId, characters),
       })),
     }
+  }
+
+  /**
+   * Sanea el texto de una pista guardada: elimina frases incoherentes con
+   * la regla de 1 persona por fila y por columna y corrige la dirección
+   * norte/sur verificándola contra las posiciones reales (la fila 0 es el
+   * norte y las filas crecen hacia el sur).
+   */
+  function repairClueText(
+    text: string,
+    characterId: string,
+    characters: Character[],
+  ): string {
+    const me = characters.find((c) => c.id === characterId)
+    const sanitized = text
+      .replace(/Nadie en su fila llevaba [^.]+\.\s*/gi, '')
+      .replace(/Nadie en su columna llevaba [^.]+\.\s*/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+    if (!me) return sanitized
+    return sanitized.replace(
+      /Estaba (exactamente|al menos) (una fila|\d+ filas?) al (norte|sur) de ([^.]+)\./gi,
+      (m, _adv: string, _qty: string, dir: string, name: string) => {
+        const ref = characters.find((c) => c.name === name.trim())
+        if (!ref || ref.id === me.id || ref.row === me.row) return m
+        const correct = ref.row > me.row ? 'al norte' : 'al sur'
+        return dir.toLowerCase() === correct ? m : m.replace(/al (norte|sur)/i, correct)
+      },
+    )
   }
 
   // ============================================================
@@ -144,8 +197,14 @@ export const usePuzzleStore = defineStore('puzzle', () => {
     saveState()
   }
 
+  /** Actualiza el modo de juego seleccionado */
+  function setMode(mode: GameMode) {
+    selectedMode.value = mode
+    saveState()
+  }
+
   /**
-   * Genera un nuevo puzzle con la temática y dificultad actuales.
+   * Genera un nuevo puzzle con la temática, dificultad y modo actuales.
    * @returns true si la generación fue exitosa
    */
   async function generate(): Promise<boolean> {
@@ -156,7 +215,8 @@ export const usePuzzleStore = defineStore('puzzle', () => {
     try {
       const puzzle = await generator.generatePuzzle(
         selectedTheme.value,
-        selectedDifficulty.value
+        selectedDifficulty.value,
+        selectedMode.value,
       )
 
       if (puzzle) {
@@ -209,6 +269,7 @@ export const usePuzzleStore = defineStore('puzzle', () => {
     currentPuzzle.value = official
     selectedTheme.value = 'pirates'
     selectedDifficulty.value = 'expert'
+    selectedMode.value = official.mode
     generationStatus.value = 'done'
     hintsUsed.value = 0  // Resetear pistas para el caso oficial
     saveState()
@@ -246,6 +307,7 @@ export const usePuzzleStore = defineStore('puzzle', () => {
     // Estado
     selectedTheme,
     selectedDifficulty,
+    selectedMode,
     currentPuzzle,
     puzzleHistory,
     generationStatus,
@@ -265,6 +327,7 @@ export const usePuzzleStore = defineStore('puzzle', () => {
     // Acciones
     setTheme,
     setDifficulty,
+    setMode,
     generate,
     loadFromHistory,
     loadOfficialContest,

@@ -6,6 +6,39 @@ export type ThemeId = 'pirates' | 'medieval' | 'scifi' | 'western' | 'jungle' | 
 /** Niveles de dificultad */
 export type DifficultyId = 'easy' | 'medium' | 'hard' | 'expert'
 
+/** Modos de juego: búsqueda del tesoro o asesino clásico */
+export type GameMode = 'treasure' | 'murder'
+
+/** Metadatos de presentación de cada modo de juego */
+export interface GameModeInfo {
+  id: GameMode
+  name: string
+  emoji: string
+  description: string
+  color: string
+}
+
+/** Catálogo de modos de juego */
+export const GAME_MODES: Record<GameMode, GameModeInfo> = {
+  treasure: {
+    id: 'treasure',
+    name: 'Búsqueda del Tesoro',
+    emoji: '💰',
+    description: 'Coloca a cada sospechoso y encuentra el tesoro en la última casilla libre.',
+    color: '#F5A623',
+  },
+  murder: {
+    id: 'murder',
+    name: 'El Asesino',
+    emoji: '🔪',
+    description: 'Encuentra a la víctima, coloca a todos y acusa a quien se quedó a solas con ella.',
+    color: '#EF4444',
+  },
+}
+
+/** Lista ordenada de modos de juego */
+export const GAME_MODE_LIST: GameModeInfo[] = [GAME_MODES.treasure, GAME_MODES.murder]
+
 /** Tipos de zonas en el mapa */
 export type ZoneType = 'room' | 'outdoor' | 'water' | 'vehicle' | 'special'
 
@@ -39,10 +72,15 @@ export interface Character {
   hat: boolean       // Lleva sombrero
   glasses: boolean   // Lleva gafas
   eyepatch: boolean  // Lleva un parche en el ojo
+  scarf?: boolean    // Lleva bufanda
+  cane?: boolean     // Lleva un bastón
+  ring?: boolean     // Lleva un anillo
+  medal?: boolean    // Lleva una medalla
+  isVictim?: boolean // true si es la víctima (solo en modo asesino)
 }
 
 /** Rasgos visuales opcionales de los personajes */
-export type AccessoryId = 'hat' | 'glasses' | 'eyepatch'
+export type AccessoryId = 'hat' | 'glasses' | 'eyepatch' | 'scarf' | 'cane' | 'ring' | 'medal'
 
 /** Metadatos de presentación de cada rasgo */
 export interface AccessoryMeta {
@@ -85,6 +123,38 @@ export const ACCESSORY_META: Record<AccessoryId, AccessoryMeta> = {
     wornPhrase: 'un parche en el ojo',
     negativePhrase: 'parche en el ojo',
   },
+  scarf: {
+    id: 'scarf',
+    emoji: '🧣',
+    label: 'Bufanda',
+    selfSentence: 'Llevaba bufanda.',
+    wornPhrase: 'bufanda',
+    negativePhrase: 'bufanda',
+  },
+  cane: {
+    id: 'cane',
+    emoji: '🦯',
+    label: 'Bastón',
+    selfSentence: 'Llevaba un bastón.',
+    wornPhrase: 'un bastón',
+    negativePhrase: 'bastón',
+  },
+  ring: {
+    id: 'ring',
+    emoji: '💍',
+    label: 'Anillo',
+    selfSentence: 'Llevaba un anillo.',
+    wornPhrase: 'un anillo',
+    negativePhrase: 'anillo',
+  },
+  medal: {
+    id: 'medal',
+    emoji: '🎖️',
+    label: 'Medalla',
+    selfSentence: 'Llevaba una medalla.',
+    wornPhrase: 'una medalla',
+    negativePhrase: 'medalla',
+  },
 }
 
 /** Lista ordenada de rasgos para iterar en la interfaz */
@@ -92,6 +162,10 @@ export const ACCESSORY_LIST: AccessoryMeta[] = [
   ACCESSORY_META.hat,
   ACCESSORY_META.glasses,
   ACCESSORY_META.eyepatch,
+  ACCESSORY_META.scarf,
+  ACCESSORY_META.cane,
+  ACCESSORY_META.ring,
+  ACCESSORY_META.medal,
 ]
 
 /** Rasgos de un personaje como lista (vacía si no lleva ninguno) */
@@ -99,11 +173,19 @@ export function getCharacterAccessories(c: {
   hat: boolean
   glasses: boolean
   eyepatch: boolean
+  scarf?: boolean
+  cane?: boolean
+  ring?: boolean
+  medal?: boolean
 }): AccessoryId[] {
   const list: AccessoryId[] = []
   if (c.hat) list.push('hat')
   if (c.glasses) list.push('glasses')
   if (c.eyepatch) list.push('eyepatch')
+  if (c.scarf) list.push('scarf')
+  if (c.cane) list.push('cane')
+  if (c.ring) list.push('ring')
+  if (c.medal) list.push('medal')
   return list
 }
 
@@ -130,6 +212,7 @@ export interface GeneratedPuzzle {
   id: string
   theme: ThemeId
   difficulty: DifficultyId
+  mode: GameMode
   title: string
   description: string
   gridSize: number      // Tamaño del grid NxN
@@ -139,6 +222,8 @@ export interface GeneratedPuzzle {
   clues: Clue[]
   treasureRow: number   // 1-indexed (o -1 si aún no resuelto)
   treasureCol: number   // 1-indexed
+  victimId?: string | null    // Id de la víctima (solo modo asesino)
+  murdererId?: string | null  // Id del asesino (solo modo asesino)
   generatedAt: string
 }
 

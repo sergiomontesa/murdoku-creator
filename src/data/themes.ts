@@ -31,7 +31,7 @@ export const THEMES: Record<string, ThemeInfo> = {
       // Objetos OCUPABLES (se pueden ocupar)
       createObj('bed', 'Cama', '🛏', true),
       createObj('chair', 'Silla', '🪑', true),
-      createObj('hammock', 'Hamaca', '🪁', true),
+      createObj('hammock', 'Hamaca', '⛺', true),
 
       // Objetos FIJOS / NO OCUPABLES (para pistas espaciales)
       createObj('campfire', 'Fogata', '🔥', false),
@@ -167,7 +167,7 @@ export const THEMES: Record<string, ThemeInfo> = {
     zones: ['Templo', 'Aldea', 'Río', 'Cascada', 'Cueva', 'Claro', 'Copa de Árboles', 'Ruinas', 'Pantano'],
     objects: [
       // Objetos OCUPABLES
-      createObj('hammock', 'Hamaca de Lianas', '🪁', true),
+      createObj('hammock', 'Hamaca de Lianas', '⛺', true),
       createObj('mat', 'Esterilla de Chozón', '🛖', true),
 
       // Objetos FIJOS
@@ -311,7 +311,7 @@ export const THEMES: Record<string, ThemeInfo> = {
       createObj('android', 'Androide', '🤖', false),
       createObj('terminal_cp', 'Terminal Hackeada', '💻', false),
       createObj('cable_cp', 'Maraña de Cables', '🔌', false),
-      createObj('camera_cp', 'Cámara de Seguridad', '📷', false),
+      createObj('camera_cp', 'Cámara de Seguridad', '📹', false),
       createObj('bike_cp', 'Moto Voladora', '🏍', false),
       createObj('barrel_cp', 'Bidón Tóxico', '🛢', false),
       createObj('antenna', 'Antena Repetidora', '📡', false),

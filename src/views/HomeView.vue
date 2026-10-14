@@ -1,14 +1,15 @@
 <script setup lang="ts">
 /**
- * Vista principal: selección de temática y dificultad.
+ * Vista principal: selección de modo de juego, temática y dificultad.
  * El usuario configura el puzzle antes de generarlo.
  */
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Sparkles, Wand2, ChevronRight, Clock, Layers, Users, Search, HelpCircle, X } from 'lucide-vue-next'
+import { Sparkles, Wand2, ChevronRight, Clock, Layers, Users, Search, HelpCircle, X, Skull } from 'lucide-vue-next'
 import { usePuzzleStore } from '@/stores/puzzle'
 import { THEME_LIST, DIFFICULTY_LIST } from '@/data/themes'
-import type { ThemeId, DifficultyId, ThemeInfo, DifficultyInfo } from '@/types/puzzle'
+import { GAME_MODE_LIST } from '@/types/puzzle'
+import type { ThemeId, DifficultyId, ThemeInfo, DifficultyInfo, GameMode } from '@/types/puzzle'
 
 const router = useRouter()
 const store = usePuzzleStore()
@@ -49,6 +50,17 @@ const selectedThemeData = computed(() =>
 const selectedDifficultyData = computed(() =>
   DIFFICULTY_LIST.find((d: DifficultyInfo) => d.id === store.selectedDifficulty)
 )
+const selectedModeData = computed(() =>
+  GAME_MODE_LIST.find((m) => m.id === store.selectedMode)
+)
+
+// Número de personas en el tablero según el modo (en asesino el tablero se llena)
+const previewPersonCount = computed(() => {
+  const diff = selectedDifficultyData.value
+  if (!diff) return 0
+  if (store.selectedMode === 'murder') return diff.gridSize
+  return diff.numCharacters
+})
 
 // Selección de temática
 function selectTheme(id: ThemeId) {
@@ -60,10 +72,21 @@ function selectDifficulty(id: DifficultyId) {
   store.setDifficulty(id)
 }
 
+// Selección de modo de juego
+function selectMode(id: GameMode) {
+  store.setMode(id)
+}
+
 // Lanzar generación
 async function startGeneration() {
   store.generationStatus = 'generating'
   router.push({ name: 'generating' })
+}
+
+// Jugar el caso oficial Murdoku Contest #1 (24×24, sin generación)
+function playOfficial() {
+  store.loadOfficialContest()
+  router.push({ name: 'puzzle' })
 }
 
 
@@ -94,7 +117,7 @@ async function startGeneration() {
 
       <p class="text-gray-400 text-lg max-w-xl mx-auto leading-relaxed">
         Crea puzzles deductivos a medida con temática, mapa y personajes procedimentales.
-        Coloca a cada sospechoso en su casilla y encuentra el tesoro escondido.
+        Elige entre buscar el tesoro escondido o descubrir al asesino clásico.
       </p>
 
       <!-- Aviso de fines educativos -->
@@ -112,6 +135,65 @@ async function startGeneration() {
         <span>Cómo jugar</span>
       </button>
     </div>
+
+    <!-- ===== SECCIÓN: MODO DE JUEGO ===== -->
+    <section class="w-full max-w-5xl mb-10 animate-fade-up" style="animation-delay: 0.05s">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+          <Skull class="w-4 h-4 text-amber-400" />
+        </div>
+        <h2 class="font-display text-xl font-bold text-white">Modo de juego</h2>
+        <div class="flex-1 h-px bg-gradient-to-r from-amber-500/30 to-transparent" />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button
+          v-for="mode in GAME_MODE_LIST"
+          :key="mode.id"
+          :id="`mode-${mode.id}`"
+          @click="selectMode(mode.id)"
+          :class="[
+            'group relative flex items-start gap-4 p-5 rounded-2xl border transition-all duration-300 cursor-pointer text-left',
+            store.selectedMode === mode.id
+              ? 'scale-[1.02]'
+              : 'glass border-white/5 hover:border-white/20'
+          ]"
+          :style="store.selectedMode === mode.id
+            ? `background: rgba(0,0,0,0.5); border-color: ${mode.color}60; box-shadow: 0 0 20px ${mode.color}30`
+            : ''"
+        >
+          <div
+            class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-none border"
+            :style="`background: ${mode.color}15; border-color: ${mode.color}40`"
+          >
+            {{ mode.emoji }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p
+              class="font-display text-base font-bold"
+              :style="store.selectedMode === mode.id ? `color: ${mode.color}` : ''"
+              :class="store.selectedMode !== mode.id ? 'text-gray-200' : ''"
+            >
+              {{ mode.name }}
+            </p>
+            <p class="text-xs text-gray-400 leading-relaxed mt-1">{{ mode.description }}</p>
+            <p v-if="mode.id === 'murder'" class="text-[11px] text-gray-500 mt-1.5">
+              Tablero lleno · víctima incluida · hay que acusar
+            </p>
+            <p v-else class="text-[11px] text-gray-500 mt-1.5">
+              Última fila y columna libres esconden el tesoro
+            </p>
+          </div>
+          <div
+            v-if="store.selectedMode === mode.id"
+            class="absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center"
+            :style="`background: ${mode.color}`"
+          >
+            <span class="text-xs text-black font-black">✓</span>
+          </div>
+        </button>
+      </div>
+    </section>
 
     <!-- ===== SECCIÓN: TEMÁTICA ===== -->
     <section class="w-full max-w-5xl mb-10 animate-fade-up" style="animation-delay: 0.1s">
@@ -284,9 +366,12 @@ async function startGeneration() {
             <span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">
               <span class="font-mono">{{ diff.gridSize }}×{{ diff.gridSize }}</span>
             </span>
-            <span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">
+            <span
+              class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10"
+              :title="store.selectedMode === 'murder' ? 'En modo asesino el tablero se llena: sospechosos + víctima' : 'En modo tesoro queda una fila y columna libres para el tesoro'"
+            >
               <Users class="w-3 h-3" />
-              {{ diff.numCharacters }}
+              {{ store.selectedMode === 'murder' ? diff.gridSize : diff.numCharacters }}
             </span>
             <span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">
               <Layers class="w-3 h-3" />
@@ -311,7 +396,12 @@ async function startGeneration() {
       <div class="glass-gold rounded-3xl p-6 lg:p-8 flex flex-col lg:flex-row items-center gap-6 border-glow-gold">
 
         <!-- Resumen de configuración -->
-        <div class="flex-1 grid grid-cols-3 gap-4">
+        <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="text-3xl mb-1">{{ selectedModeData?.emoji }}</div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-0.5">Modo</p>
+            <p class="font-display font-bold text-sm text-white">{{ selectedModeData?.name }}</p>
+          </div>
           <div class="text-center">
             <div class="text-3xl mb-1">{{ selectedThemeData?.emoji }}</div>
             <p class="text-xs text-gray-500 uppercase tracking-widest mb-0.5">Temática</p>
@@ -327,7 +417,7 @@ async function startGeneration() {
               {{ selectedDifficultyData?.gridSize }}×{{ selectedDifficultyData?.gridSize }}
             </div>
             <p class="text-xs text-gray-500 uppercase tracking-widest mb-0.5">Grid</p>
-            <p class="font-display font-bold text-sm text-white">{{ selectedDifficultyData?.numCharacters }} personajes</p>
+            <p class="font-display font-bold text-sm text-white">{{ previewPersonCount }} personas</p>
           </div>
         </div>
 
@@ -352,6 +442,22 @@ async function startGeneration() {
       </div>
     </section>
 
+    <!-- ===== SECCIÓN: CASO OFICIAL ===== -->
+    <section class="w-full max-w-5xl mb-10 animate-fade-up" style="animation-delay: 0.35s">
+      <button
+        id="btn-official"
+        @click="playOfficial"
+        class="w-full group flex items-center gap-4 p-5 rounded-2xl glass border border-yellow-500/25 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer text-left"
+      >
+        <div class="w-12 h-12 rounded-2xl bg-yellow-500/15 border border-yellow-500/30 flex items-center justify-center text-2xl flex-none">🗺️</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-display font-bold text-white text-base">Caso oficial: Murdoku Contest #1</p>
+          <p class="text-xs text-gray-400 mt-0.5">El tablero original de 24×24 con 23 sospechosos (mapa.png y reglas.txt). Sin generación: el caso tal cual se publicó.</p>
+        </div>
+        <ChevronRight class="w-5 h-5 text-yellow-500 group-hover:translate-x-1 transition-transform flex-none" />
+      </button>
+    </section>
+
     <!-- ===== HISTORIAL ===== -->
     <section
       v-if="store.puzzleHistory.length > 0"
@@ -369,7 +475,7 @@ async function startGeneration() {
           class="flex-none glass rounded-xl p-3 border border-white/5 hover:border-white/20 transition-all duration-200 text-left"
         >
           <p class="font-display text-sm font-bold text-white truncate w-32">{{ past.title }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">{{ past.gridSize }}×{{ past.gridSize }} · {{ past.characters.length }} personajes</p>
+          <p class="text-xs text-gray-500 mt-0.5">{{ past.gridSize }}×{{ past.gridSize }} · {{ past.characters.length }} personas · {{ past.mode === 'murder' ? '🔪 Asesino' : '💰 Tesoro' }}</p>
         </button>
       </div>
     </section>
@@ -395,11 +501,11 @@ async function startGeneration() {
           <ol class="space-y-3 text-sm text-gray-300">
             <li class="flex gap-2.5">
               <span class="flex-none w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black flex items-center justify-center">1</span>
-              <p><strong class="text-white">Un sospechoso por fila y por columna.</strong> Como en el sudoku: si dos fichas comparten fila o columna, verás un aviso rojo.</p>
+              <p><strong class="text-white">Una persona por fila y por columna.</strong> Como en el sudoku: si dos fichas comparten fila o columna, verás un aviso rojo. La víctima también cuenta.</p>
             </li>
             <li class="flex gap-2.5">
               <span class="flex-none w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black flex items-center justify-center">2</span>
-              <p><strong class="text-white">Lee los testimonios.</strong> Cada pista describe dónde estaba alguien: junto a un objeto, en una zona o al este/oeste de otro. Algunos llevan 🎩 👓 👁️ y las pistas los mencionan («al este de Marta, que llevaba gafas»).</p>
+              <p class="font-emoji"><strong class="text-white">Lee los testimonios.</strong> Cada pista describe dónde estaba alguien: junto a un objeto, en una zona o al este/oeste de otro. Algunos llevan 🎩 👓 👁️ 🧣 🦯 💍 🎖️ y las pistas los mencionan («al este de Marta, que llevaba gafas»).</p>
             </li>
             <li class="flex gap-2.5">
               <span class="flex-none w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black flex items-center justify-center">3</span>
@@ -407,11 +513,15 @@ async function startGeneration() {
             </li>
             <li class="flex gap-2.5">
               <span class="flex-none w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black flex items-center justify-center">4</span>
-              <p><strong class="text-white">El tesoro está en la última casilla.</strong> Cuando las 23 fichas estén bien colocadas, solo quedará una fila y una columna libres: su cruce esconde el tesoro.</p>
+              <p><strong class="text-white">Dos formas de ganar.</strong> En 💰 Tesoro, la última fila y columna libres esconden el tesoro. En 🔪 Asesino, el tablero se llena y el culpable es quien se quedó a solas con la víctima en su zona: colócalos a todos y pulsa Acusar.</p>
             </li>
             <li class="flex gap-2.5">
               <span class="flex-none w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black flex items-center justify-center">5</span>
               <p><strong class="text-white">Pide ayuda si te atascas.</strong> Tienes 3 pistas que colocan una ficha y el botón Comprobar, que cuenta aciertos sin revelar cuáles.</p>
+            </li>
+          <li class="flex gap-2.5">
+              <span class="flex-none w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-black flex items-center justify-center">6</span>
+              <p><strong class="text-white">Usa Deshacer y Candidatas.</strong> El botón Deshacer (o Ctrl+Z) recupera tu último movimiento. Con ✏️ Candidatas (o C) marcas varias casillas posibles por personaje y luego fijas una. Para retirar una ficha, arrástrala fuera del tablero.</p>
             </li>
           </ol>
           <button

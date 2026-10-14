@@ -6,10 +6,10 @@
 import { ref } from 'vue'
 import type {
   GeneratedPuzzle, Zone, Character, Clue, PlacedObject,
-  ThemeId, DifficultyId, ZoneType, MapObject, AccessoryId
+  ThemeId, DifficultyId, ZoneType, MapObject, AccessoryId, GameMode
 } from '@/types/puzzle'
 import { getTheme, getDifficulty } from '@/data/themes'
-import { ACCESSORY_META, getCharacterAccessories } from '@/types/puzzle'
+import { ACCESSORY_META, ACCESSORY_LIST, getCharacterAccessories } from '@/types/puzzle'
 
 // ============================================================
 // UTILIDADES DE ALEATORIEDAD
@@ -235,13 +235,14 @@ function generateCharacters(
     }
   }
 
-  // Reparto de rasgos visuales (sombrero, gafas, parche): como máximo uno
-  // por personaje y solo en una parte de ellos (~45%), para que los rasgos
-  // sirvan como seña de identidad en las pistas sin saturar el tablero.
+  // Reparto de rasgos visuales (sombrero, gafas, parche, bufanda, bastón,
+  // anillo, medalla): como máximo uno por personaje y solo en una parte
+  // de ellos (~45%), para que los rasgos sirvan como seña de identidad
+  // en las pistas sin saturar el tablero.
   // Se garantiza al menos un personaje con rasgo y al menos uno sin rasgo.
   const numWithAccessory = Math.max(1, Math.min(numChars - 1, Math.round(numChars * 0.45)))
   const shuffledPositions = shuffle([...Array(numChars).keys()])
-  const accessoryCycle = shuffle<AccessoryId>(['hat', 'glasses', 'eyepatch'])
+  const accessoryCycle = shuffle(ACCESSORY_LIST.map((m) => m.id))
   const accessoryByIndex = new Map<number, AccessoryId>()
   shuffledPositions.slice(0, numWithAccessory).forEach((charPos, k) => {
     accessoryByIndex.set(charPos, accessoryCycle[k % accessoryCycle.length])
@@ -278,6 +279,10 @@ function generateCharacters(
       hat: accessory === 'hat',
       glasses: accessory === 'glasses',
       eyepatch: accessory === 'eyepatch',
+      scarf: accessory === 'scarf',
+      cane: accessory === 'cane',
+      ring: accessory === 'ring',
+      medal: accessory === 'medal',
     })
     charIdx++
   }
@@ -298,7 +303,7 @@ function generateClues(
   zones: Zone[],
   placedObjects: PlacedObject[],
   theme: ReturnType<typeof getTheme>,
-  _complexity: 'simple' | 'moderate' | 'complex' | 'devious'
+  complexity: 'simple' | 'moderate' | 'complex' | 'devious'
 ): Clue[] {
   const clues: Clue[] = []
   const zoneMap = new Map(zones.map(z => [z.id, z]))
@@ -412,48 +417,104 @@ function generateClues(
     }
 
     // Seña de identidad: si el personaje lleva un rasgo, mencionarlo junto
-    // a la pista de localización ("... Llevaba sombrero.")
+    // a la pista de localización ("... Llevaba bufanda.")
     const ownAccessory = getCharacterAccessories(char)[0]
-    if (ownAccessory && Math.random() < 0.45) {
+    if (ownAccessory && Math.random() < 0.7) {
       clueText += ` ${ACCESSORY_META[ownAccessory].selfSentence}`
     }
 
-    // Añadir regla secundaria de columna/rasgo en pistas complejas
-    if (Math.random() < 0.35) {
+    // Frases secundarias verificadas: cada pista combina la localización
+    // principal con datos adicionales ciertos (zona, distancia norte/sur,
+    // este/oeste, ausencia de objetos o de rasgos). Todas se comprueban
+    // contra la solución y son coherentes con la regla de 1 persona por
+    // fila y por columna. Se agrupan por categoría para mantener variedad
+    // y se añaden 1 siempre + 1 extra según la complejidad.
+    const mainMentionsZone = clueType === 'zone' || clueType === 'row'
+    const mainIsRelative = clueType === 'relative'
+    const others = characters.filter(c => c.id !== char.id)
+    const buckets: Array<{ kind: string; texts: string[] }> = []
+
+    // — Nombre de la zona (si la pista principal no la menciona) —
+    if (!mainMentionsZone && zone) {
+      buckets.push({ kind: 'zone', texts: [`Su zona era ${zone.name}.`] })
+    }
+
+    // — Distancia norte/sur respecto a otro personaje (las filas son
+    // siempre distintas por la regla de unicidad, así que diff >= 1) —
+    if (others.length > 0) {
+      const ref = rPick(others)
+      const diff = Math.abs(ref.row - char.row)
+      if (diff >= 1) {
+        const qty = diff === 1 ? 'una fila' : `${diff} filas`
+        const dir = ref.row > char.row ? 'al norte' : 'al sur'
+        buckets.push({
+          kind: 'northsouth',
+          texts: [
+            `Estaba exactamente ${qty} ${dir} de ${ref.name}.`,
+            `Estaba al menos ${qty} ${dir} de ${ref.name}.`,
+          ],
+        })
+      }
+    }
+
+    // — Este/oeste respecto a otro personaje (si la principal no lo dice) —
+    if (!mainIsRelative && others.length > 0) {
+      const eastOf = others.filter(o => o.col < char.col)
+      const westOf = others.filter(o => o.col > char.col)
+      const ew: string[] = []
+      if (eastOf.length > 0) ew.push(`Estaba al este de ${rPick(eastOf).name}.`)
+      if (westOf.length > 0) ew.push(`Estaba al oeste de ${rPick(westOf).name}.`)
+      if (ew.length > 0) buckets.push({ kind: 'eastwest', texts: ew })
+    }
+
+    // — Ausencia de un objeto en toda su columna (verificado) —
+    {
       const nonOccThemeObjs = theme.objects.filter((o: MapObject) => !o.occupiable)
       const objectsInCol = placedObjects.filter(p => p.col === char.col)
       const sampleObj = nonOccThemeObjs.length > 0 ? rPick(nonOccThemeObjs) : null
       const hasSampleObj = sampleObj ? objectsInCol.some(p => p.objectId === sampleObj.id) : false
-
-      if (sampleObj && !hasSampleObj && Math.random() < 0.5) {
+      if (sampleObj && !hasSampleObj) {
         const art = /^[aeiou]/i.test(sampleObj.name) ? 'ninguna' : 'ningún'
-        clueText += ` No había ${art} ${sampleObj.name.toLowerCase()} en toda su columna.`
-      } else {
-        // Negaciones de rasgos verificadas contra la solución: solo se afirma
-        // la ausencia de un rasgo que el propio personaje no lleva y que nadie
-        // en esa fila, columna o columnas adyacentes lleva.
-        const ownAcc = new Set(getCharacterAccessories(char))
-        const negatives: string[] = []
-        for (const acc of ['hat', 'glasses', 'eyepatch'] as AccessoryId[]) {
-          if (ownAcc.has(acc)) continue
-          const phrase = ACCESSORY_META[acc].negativePhrase
-          const inRow = characters.some(
-            o => getCharacterAccessories(o).includes(acc) && o.row === char.row
-          )
-          if (!inRow) negatives.push(`Nadie en su fila llevaba ${phrase}.`)
-          const inCol = characters.some(
-            o => getCharacterAccessories(o).includes(acc) && o.col === char.col
-          )
-          if (!inCol) negatives.push(`Nadie en su columna llevaba ${phrase}.`)
-          const inAdjCol = characters.some(
-            o => getCharacterAccessories(o).includes(acc) && Math.abs(o.col - char.col) === 1
-          )
-          if (!inAdjCol) negatives.push(`Nadie en una columna adyacente llevaba ${phrase}.`)
-        }
-        if (negatives.length > 0) {
-          clueText += ` ${rPick(negatives)}`
-        }
+        buckets.push({ kind: 'object', texts: [`No había ${art} ${sampleObj.name.toLowerCase()} en toda su columna.`] })
       }
+    }
+
+    // — Columna exacta (verificada; complementa sobre todo a las pistas de zona) —
+    if (clueType === 'zone') {
+      buckets.push({ kind: 'column', texts: [`Estaba en la columna ${char.col + 1}.`] })
+    }
+
+    // — Negaciones de rasgos verificadas contra la solución y coherentes
+    // con la regla de 1 por fila/columna: solo la zona compartida y las
+    // columnas adyacentes (nunca la propia fila o columna).
+    {
+      const ownAcc = new Set(getCharacterAccessories(char))
+      const negatives: string[] = []
+      for (const meta of ACCESSORY_LIST) {
+        if (ownAcc.has(meta.id)) continue
+        const inZone = characters.some(
+          o => o.id !== char.id && getCharacterAccessories(o).includes(meta.id) && o.zoneId === char.zoneId
+        )
+        if (!inZone) negatives.push(`Nadie más en su zona llevaba ${meta.negativePhrase}.`)
+        const inAdjCol = characters.some(
+          o => getCharacterAccessories(o).includes(meta.id) && Math.abs(o.col - char.col) === 1
+        )
+        if (!inAdjCol) negatives.push(`Nadie en una columna adyacente llevaba ${meta.negativePhrase}.`)
+      }
+      if (negatives.length > 0) buckets.push({ kind: 'trait', texts: negatives })
+    }
+
+    // Añadir una secundaria de una categoría al azar y, según la
+    // complejidad, una segunda de otra categoría distinta.
+    const extraProb = complexity === 'simple' ? 0.2 : complexity === 'moderate' ? 0.3 : 0.45
+    const order = shuffle(buckets)
+    if (order.length > 0) {
+      clueText += ` ${rPick(order[0].texts)}`
+      if (order[0].kind === 'column') clueType = 'column'
+    }
+    if (order.length > 1 && Math.random() < extraProb) {
+      clueText += ` ${rPick(order[1].texts)}`
+      if (order[1].kind === 'column') clueType = 'column'
     }
 
     clues.push({
@@ -467,11 +528,38 @@ function generateClues(
   return clues
 }
 
+/**
+ * Sanea el texto de una pista eliminando frases incoherentes con la regla
+ * de 1 persona por fila y por columna (p. ej. "Nadie en su fila/columna
+ * llevaba ..." o "en la misma fila/columna que ..."). Esas frases son
+ * trivialmente ciertas o implican compartir fila/columna, lo cual es
+ * imposible y despista al jugador. Se conservan la zona y las columnas
+ * adyacentes, que sí son coherentes.
+ */
+function sanitizeClueText(text: string): string {
+  return text
+    .replace(/Nadie en su fila llevaba [^.]+\.\s*/gi, '')
+    .replace(/Nadie en su columna llevaba [^.]+\.\s*/gi, '')
+    .replace(/en la misma fila que [^.]+\.\s*/gi, '')
+    .replace(/en la misma columna que [^.]+\.\s*/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+/** Aplica el saneado a una lista de pistas sin alterar las que ya son coherentes */
+function sanitizeClues(clues: Clue[]): Clue[] {
+  return clues.map((clue) => ({ ...clue, text: sanitizeClueText(clue.text) }))
+}
+
 // ============================================================
 // TÍTULO Y DESCRIPCIÓN
 // ============================================================
 
-function generateTitle(theme: ReturnType<typeof getTheme>, difficulty: ReturnType<typeof getDifficulty>): string {
+function generateTitle(
+  theme: ReturnType<typeof getTheme>,
+  difficulty: ReturnType<typeof getDifficulty>,
+  mode: GameMode = 'treasure',
+): string {
   const titles: Record<string, string[]> = {
     pirates: ['El Tesoro Perdido', 'La Isla de la Muerte', 'Misterio en el Galeón', 'El Mapa Secreto', 'Traición en la Balandra'],
     medieval: ['El Traidor del Castillo', 'La Conspiración de Valdorn', 'El Veneno de la Corona', 'La Espada Robada'],
@@ -487,12 +575,102 @@ function generateTitle(theme: ReturnType<typeof getTheme>, difficulty: ReturnTyp
     olympics: ['Sabotaje en la Final', 'El Récord Robado', 'Veneno en la Villa Olímpica', 'El Cronómetro Trucado'],
     kitchen: ['Veneno en el Servicio', 'El Secreto del Chef', 'Sabotaje en los Fogones', 'La Receta Robada'],
   }
-  const themeTitles = titles[theme.id] ?? titles.pirates
-  return `${rPick(themeTitles)} · ${difficulty.name}`
+  const murderTitles: Record<string, string[]> = {
+    pirates: ['Asesinato en el Galeón', 'Muerte en la Balandra', 'El Crimen de la Isla Calavera'],
+    medieval: ['Asesinato en el Castillo', 'Crimen en la Torre', 'Muerte en Valdorn'],
+    scifi: ['Asesinato en el Hangar', 'Crimen en la Estación Orbital', 'Muerte en Criogenia'],
+    western: ['Asesinato en el Saloon', 'Crimen en el Rancho', 'Muerte al Amanecer'],
+    jungle: ['Asesinato en el Templo', 'Crimen en la Aldea', 'Muerte en el Manglar'],
+    spooky: ['Asesinato en la Mansión', 'Crimen en la Cripta', 'Muerte en el Torreón'],
+    detective: ['Asesinato en Baker Street', 'Crimen en la Mansión', 'Muerte en el Orient Express'],
+    egypt: ['Asesinato en la Pirámide', 'Crimen a Orillas del Nilo', 'Muerte del Faraón'],
+    cyberpunk: ['Asesinato en Neo-Tokyo', 'Crimen en el Nivel Bajo', 'Muerte en el Arcade'],
+    feudal: ['Asesinato en el Dojo', 'Crimen en la Pagoda', 'Muerte del Shogun'],
+    zombie: ['Asesinato en el Refugio', 'Crimen en el Hospital', 'Muerte en el Supermercado'],
+    olympics: ['Asesinato en la Final', 'Crimen en la Villa Olímpica', 'Muerte en el Podio'],
+    kitchen: ['Asesinato en los Fogones', 'Crimen en el Servicio', 'Muerte del Chef'],
+  }
+  const pool = mode === 'murder'
+    ? (murderTitles[theme.id] ?? titles[theme.id] ?? titles.pirates)
+    : (titles[theme.id] ?? titles.pirates)
+  return `${rPick(pool)} · ${difficulty.name}`
 }
 
-function generateDescription(theme: ReturnType<typeof getTheme>, numChars: number, gridSize: number): string {
+function generateDescription(
+  theme: ReturnType<typeof getTheme>,
+  numChars: number,
+  gridSize: number,
+  mode: GameMode = 'treasure',
+): string {
+  if (mode === 'murder') {
+    return `Caso clásico en ${theme.name.toLowerCase()} con ${numChars - 1} sospechosos y 1 víctima en un mapa de ${gridSize}×${gridSize}. El asesino es quien se quedó a solas con la víctima en su zona.`
+  }
   return `Caso de deducción en ${theme.name.toLowerCase()} con ${numChars} sospechosos en un mapa de ${gridSize}×${gridSize}. El tesoro está enterrado en el cruce de la última fila y la última columna libres.`
+}
+
+/**
+ * Elige víctima y asesino con la regla clásica: la zona de la víctima
+ * contiene exactamente 2 personas (víctima + asesino).
+ * @returns par víctima/asesino o null si ninguna zona cumple la regla
+ */
+function pickVictimAndMurderer(characters: Character[]): { victimId: string; murdererId: string } | null {
+  const byZone = new Map<string, Character[]>()
+  for (const c of characters) {
+    const list = byZone.get(c.zoneId) ?? []
+    list.push(c)
+    byZone.set(c.zoneId, list)
+  }
+  const candidates = [...byZone.values()].filter((list) => list.length === 2)
+  if (candidates.length === 0) return null
+  const pair = rPick(candidates)
+  const shuffled = shuffle(pair)
+  return { victimId: shuffled[0].id, murdererId: shuffled[1].id }
+}
+
+/**
+ * Genera el reparto del modo asesino: tantas personas como tamaño del grid
+ * (tablero lleno, víctima incluida) y una zona con exactamente 2 ocupantes.
+ * Reintenta la colocación hasta cumplir la regla del "a solas".
+ */
+function generateMurderCast(
+  gridSize: number,
+  zones: Zone[],
+  placedObjects: PlacedObject[],
+  theme: ReturnType<typeof getTheme>,
+): { characters: Character[]; victimId: string; murdererId: string } | null {
+  let lastChars: Character[] = []
+  for (let attempt = 0; attempt < 120; attempt++) {
+    const chars = generateCharacters(gridSize, gridSize, zones, placedObjects, theme)
+    if (chars.length < gridSize) continue
+    lastChars = chars
+    const pair = pickVictimAndMurderer(chars)
+    if (pair) {
+      const characters = chars.map((c) => ({
+        ...c,
+        isVictim: c.id === pair.victimId,
+      }))
+      return { characters, ...pair }
+    }
+  }
+  // Alternativa degradada: usar la zona menos ocupada aunque tenga más de 2,
+  // para no bloquear la generación en mapas muy densos.
+  if (lastChars.length >= gridSize) {
+    const byZone = new Map<string, Character[]>()
+    for (const c of lastChars) {
+      const list = byZone.get(c.zoneId) ?? []
+      list.push(c)
+      byZone.set(c.zoneId, list)
+    }
+    const sorted = [...byZone.values()]
+      .filter((l) => l.length >= 2)
+      .sort((a, b) => a.length - b.length)
+    if (sorted.length > 0) {
+      const pair = shuffle(sorted[0]).slice(0, 2)
+      const characters = lastChars.map((c) => ({ ...c, isVictim: c.id === pair[0].id }))
+      return { characters, victimId: pair[0].id, murdererId: pair[1].id }
+    }
+  }
+  return null
 }
 
 // ============================================================
@@ -517,13 +695,15 @@ export function usePuzzleGenerator() {
    * Genera un puzzle proceduralmente:
    * 1. Zonas del escenario
    * 2. Objetos del mapa (ocupables y no ocupables)
-   * 3. Solución de sospechosos (1 por fila/columna)
+   * 3. Solución de personajes (1 por fila/columna)
    * 4. Pistas deductivas
-   * 5. Coordenadas del Tesoro en la última casilla desocupada
+   * 5a. Modo tesoro: coordenadas del Tesoro en la última casilla desocupada
+   * 5b. Modo asesino: tablero lleno con víctima y asesino a solas en su zona
    */
   async function generatePuzzle(
     themeId: ThemeId,
-    difficultyId: DifficultyId
+    difficultyId: DifficultyId,
+    mode: GameMode = 'treasure',
   ): Promise<GeneratedPuzzle | null> {
     isGenerating.value = true
     progress.value = 0
@@ -540,10 +720,52 @@ export function usePuzzleGenerator() {
       const placedObjects = generateObjects(gridSize, theme)
 
       await progressStep('Calculando posiciones válidas de los personajes...', 75, 500)
+
+      if (mode === 'murder') {
+        const cast = generateMurderCast(gridSize, zones, placedObjects, theme)
+        if (!cast) return null
+
+        await progressStep('Redactando pistas y testimonios deductivos...', 90, 500)
+        const rawClues = generateClues(cast.characters, zones, placedObjects, theme, clueComplexity)
+        // La pista de la víctima es siempre la regla clásica del "a solas"
+        const clues = sanitizeClues(
+          rawClues.map((clue) =>
+            clue.characterId === cast.victimId
+              ? { ...clue, text: 'La víctima. Estaba a solas con el asesino.', type: 'special' as const }
+              : clue,
+          ),
+        )
+
+        await progressStep('Eligiendo a la víctima y al asesino...', 98, 300)
+
+        const puzzle: GeneratedPuzzle = {
+          id: genId(),
+          theme: themeId,
+          difficulty: difficultyId,
+          mode: 'murder',
+          title: generateTitle(theme, difficulty, 'murder'),
+          description: generateDescription(theme, cast.characters.length, gridSize, 'murder'),
+          gridSize,
+          zones,
+          characters: cast.characters,
+          placedObjects,
+          clues,
+          treasureRow: -1,
+          treasureCol: -1,
+          victimId: cast.victimId,
+          murdererId: cast.murdererId,
+          generatedAt: new Date().toISOString(),
+        }
+
+        progress.value = 100
+        statusMessage.value = '¡Puzzle generado con éxito!'
+        return puzzle
+      }
+
       const characters = generateCharacters(gridSize, numCharacters, zones, placedObjects, theme)
 
       await progressStep('Redactando pistas y testimonios deductivos...', 90, 500)
-      const clues = generateClues(characters, zones, placedObjects, theme, clueComplexity)
+      const clues = sanitizeClues(generateClues(characters, zones, placedObjects, theme, clueComplexity))
 
       await progressStep('Ocultando el tesoro en la última casilla...', 98, 300)
 
@@ -566,8 +788,9 @@ export function usePuzzleGenerator() {
         id: genId(),
         theme: themeId,
         difficulty: difficultyId,
-        title: generateTitle(theme, difficulty),
-        description: generateDescription(theme, numCharacters, gridSize),
+        mode: 'treasure',
+        title: generateTitle(theme, difficulty, 'treasure'),
+        description: generateDescription(theme, numCharacters, gridSize, 'treasure'),
         gridSize,
         zones,
         characters,
@@ -575,6 +798,8 @@ export function usePuzzleGenerator() {
         clues,
         treasureRow,
         treasureCol,
+        victimId: null,
+        murdererId: null,
         generatedAt: new Date().toISOString(),
       }
 

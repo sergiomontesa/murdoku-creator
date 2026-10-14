@@ -309,6 +309,7 @@ export function getOfficialContestPuzzle(): GeneratedPuzzle {
     id: 'murdoku-official-contest-1',
     theme: 'pirates',
     difficulty: 'expert',
+    mode: 'treasure',
     title: 'Murdoku Contest #1 — El Tesoro Pirata',
     description: 'El caso oficial del concurso Murdoku de 24×24. Encuentra las coordenadas del Tesoro resolviendo los testimonios de los 23 sospechosos.',
     gridSize: 24,
@@ -318,6 +319,8 @@ export function getOfficialContestPuzzle(): GeneratedPuzzle {
     clues: OFFICIAL_CLUES,
     treasureRow: 24,
     treasureCol: 8,
+    victimId: null,
+    murdererId: null,
     generatedAt: '2026-10-12T10:00:00Z',
   }
 }
